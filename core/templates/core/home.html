@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Amstack - Build Better Apps Faster{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-b from-gray-50 to-white py-20 lg:py-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 mb-6">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Django & AI Development
+        </span>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
+            Build Better Apps<br>
+            <span class="text-indigo-600">Faster</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            Django • AI • Automation • Clean Web Apps. I help startups and developers build production-ready applications.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="#services" class="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
+                View Services
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+            </a>
+            <a href="#contact" class="inline-flex items-center justify-center px-6 py-3 bg-white text-gray-700 font-medium rounded-full border border-gray-300 hover:bg-gray-50 transition">
+                Hire Me
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Services Section -->
+<section id="services" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Featured Services</h2>
+            <p class="text-gray-600">Turn your ideas into production-ready applications</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Service Card 1 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
+                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Django MVP Build</h3>
+                <p class="text-gray-600 text-sm mb-4">Launch your MVP in 2-4 weeks</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-900 font-semibold">From $2500</span>
+                    <a href="#" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Learn more →</a>
+                </div>
+            </div>
+            
+            <!-- Service Card 2 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
+                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">API Development (REST)</h3>
+                <p class="text-gray-600 text-sm mb-4">Scalable API architecture</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-900 font-semibold">From $1500</span>
+                    <a href="#" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Learn more →</a>
+                </div>
+            </div>
+            
+            <!-- Service Card 3 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
+                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Chatbot Integration</h3>
+                <p class="text-gray-600 text-sm mb-4">Smart AI assistants for your app</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-900 font-semibold">From $2000</span>
+                    <a href="#" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Learn more →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-10">
+            <a href="#" class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-full text-gray-700 font-medium hover:bg-gray-50 transition">
+                View All Services
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Coding Tutorials Section -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Coding Tutorials</h2>
+            <p class="text-gray-600">Learn Django, Python, and modern web development</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Tutorial Card 1 -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+                <div class="flex gap-2 mb-4">
+                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">Django</span>
+                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Building a Django REST API with JWT Authentication</h3>
+                <p class="text-gray-600 text-sm mb-4">Learn how to build a secure REST API with Django REST Framework and implement JWT authentication...</p>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">12 min</span>
+                    <a href="#" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
+                </div>
+            </div>
+            
+            <!-- Tutorial Card 2 -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+                <div class="flex gap-2 mb-4">
+                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">Django</span>
+                    <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded">PAID</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Production-Grade Django + Tailwind SaaS Architecture</h3>
+                <p class="text-gray-600 text-sm mb-4">A comprehensive guide to building production-ready SaaS applications with Django, Tailwind CSS, and...</p>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">25 min</span>
+                    <a href="#" class="text-indigo-600 font-medium hover:text-indigo-700">Enroll to read →</a>
+                </div>
+            </div>
+            
+            <!-- Tutorial Card 3 -->
+            <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+                <div class="flex gap-2 mb-4">
+                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded">Python</span>
+                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Ethical Web Scraping with Python</h3>
+                <p class="text-gray-600 text-sm mb-4">Build robust web scrapers with BeautifulSoup and Scrapy. Handle JavaScript-rendered content and...</p>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">15 min</span>
+                    <a href="#" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-10">
+            <a href="#" class="inline-flex items-center px-6 py-3 border border-gray-300 bg-white rounded-full text-gray-700 font-medium hover:bg-gray-50 transition">
+                Browse All Tutorials
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="py-16 bg-indigo-600">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Stay Updated</h2>
+        <p class="text-indigo-100 mb-8">Get weekly tips on Django, Python, and building better web apps.</p>
+        <form class="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+            <input 
+                type="email" 
+                placeholder="Enter your email" 
+                class="flex-grow px-4 py-3 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            >
+            <button type="submit" class="px-6 py-3 bg-white text-indigo-600 font-medium rounded-full hover:bg-gray-100 transition">
+                Subscribe
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">What Clients Say</h2>
+            <p class="text-gray-600">Trusted by startups and developers worldwide</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Testimonial 1 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-semibold mr-3">SC</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Sarah Chen</h4>
+                        <p class="text-sm text-gray-500">CTO, TechStartup</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 italic">"Delivered our MVP in record time. Clean code, great communication, and the app just works."</p>
+            </div>
+            
+            <!-- Testimonial 2 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold mr-3">MR</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Michael Ross</h4>
+                        <p class="text-sm text-gray-500">Founder, DataFlow</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 italic">"The API architecture was exactly what we needed. Scalable, well-documented, and production-ready."</p>
+            </div>
+            
+            <!-- Testimonial 3 -->
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center font-semibold mr-3">EW</div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">Emma Wilson</h4>
+                        <p class="text-sm text-gray-500">Product Manager, FinApp</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 italic">"Transformed our slow Django app into a lightning-fast experience. Highly recommended!"</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section id="contact" class="py-20 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="bg-white rounded-2xl p-8 md:p-12 border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to Build Something Great?</h2>
+            <p class="text-gray-600 mb-8">Let's discuss your project and see how I can help bring your ideas to life.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#" class="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
+                    Start a Project
+                </a>
+                <a href="#services" class="inline-flex items-center justify-center px-6 py-3 text-gray-700 font-medium hover:text-gray-900 transition">
+                    Explore Services
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
