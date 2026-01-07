@@ -2,6 +2,25 @@
 
 {% block title %}Amstack - Build Better Apps Faster{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Default gray shadow for cards */
+    .card-default {
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Colored shadows for cards on hover - equal from all sides */
+    .card-hover:hover {
+        box-shadow: 0 0 30px rgba(14, 165, 233, 0.3), 0 0 60px rgba(14, 165, 233, 0.2);
+    }
+    
+    /* Remove border effect on hover by default, keep minimal look */
+    .card-default, .card-hover {
+        transition: box-shadow 0.3s ease;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="bg-gradient-to-b from-gray-50 to-white py-20 lg:py-32">
@@ -43,7 +62,7 @@
         
         <div class="grid md:grid-cols-3 gap-8">
             <!-- Service Card 1 -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
@@ -58,7 +77,7 @@
             </div>
             
             <!-- Service Card 2 -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
@@ -73,7 +92,7 @@
             </div>
             
             <!-- Service Card 3 -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
                     <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
@@ -105,8 +124,33 @@
         </div>
         
         <div class="grid md:grid-cols-3 gap-8">
-            <!-- Tutorial Card 1 -->
-            <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+            {% for post in latest_posts %}
+            <!-- Tutorial Card -->
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
+                <div class="flex gap-2 mb-4">
+                    {% if post.category %}
+                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">{{ post.category.name }}</span>
+                    {% endif %}
+                    {% if post.is_free %}
+                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
+                    {% else %}
+                    <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded">PAID</span>
+                    {% endif %}
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                    <a href="{{ post.get_absolute_url }}" class="hover:text-indigo-600 transition">
+                        {{ post.title }}
+                    </a>
+                </h3>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.excerpt }}</p>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">{{ post.reading_time }} min</span>
+                    <a href="{{ post.get_absolute_url }}" class="text-indigo-600 font-medium hover:text-indigo-700">{% if post.is_free %}Read →{% else %}Enroll to read →{% endif %}</a>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Fallback if no posts exist -->
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="flex gap-2 mb-4">
                     <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">Django</span>
                     <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
@@ -119,8 +163,7 @@
                 </div>
             </div>
             
-            <!-- Tutorial Card 2 -->
-            <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="flex gap-2 mb-4">
                     <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">Django</span>
                     <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded">PAID</span>
@@ -133,8 +176,7 @@
                 </div>
             </div>
             
-            <!-- Tutorial Card 3 -->
-            <div class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="flex gap-2 mb-4">
                     <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded">Python</span>
                     <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
@@ -146,10 +188,11 @@
                     <a href="#" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
                 </div>
             </div>
+            {% endfor %}
         </div>
         
         <div class="text-center mt-10">
-            <a href="#" class="inline-flex items-center px-6 py-3 border border-gray-300 bg-white rounded-full text-gray-700 font-medium hover:bg-gray-50 transition">
+            <a href="{% url 'blog:post_list' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 bg-white rounded-full text-gray-700 font-medium hover:bg-gray-50 transition">
                 Browse All Tutorials
             </a>
         </div>
@@ -184,7 +227,7 @@
         
         <div class="grid md:grid-cols-3 gap-8">
             <!-- Testimonial 1 -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-semibold mr-3">SC</div>
                     <div>
@@ -196,7 +239,7 @@
             </div>
             
             <!-- Testimonial 2 -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold mr-3">MR</div>
                     <div>
@@ -208,7 +251,7 @@
             </div>
             
             <!-- Testimonial 3 -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center font-semibold mr-3">EW</div>
                     <div>
@@ -225,7 +268,7 @@
 <!-- CTA Section -->
 <section id="contact" class="py-20 bg-gray-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="bg-white rounded-2xl p-8 md:p-12 border border-gray-200 shadow-sm">
+        <div class="bg-white rounded-2xl p-8 md:p-12 card-default card-hover">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to Build Something Great?</h2>
             <p class="text-gray-600 mb-8">Let's discuss your project and see how I can help bring your ideas to life.</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">

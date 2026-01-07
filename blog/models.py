@@ -44,10 +44,29 @@ class Category(models.Model):
     def is_parent(self):
         return self.parent is None
     
+    def has_posts(self):
+        """Check if category or its subcategories have any published posts."""
+        from django.db.models import Q
+        category_ids = [self.id]
+        if self.is_parent:
+            category_ids.extend(self.subcategories.values_list('id', flat=True))
+        return Post.objects.filter(
+            category_id__in=category_ids,
+            is_published=True
+        ).exists()
+    
     @classmethod
     def get_parent_categories(cls):
-        """Get all parent categories with their subcategories."""
-        return cls.objects.filter(parent__isnull=True, is_active=True).prefetch_related('subcategories')
+        """Get all parent categories with their subcategories that have posts."""
+        parents = cls.objects.filter(parent__isnull=True, is_active=True).prefetch_related('subcategories')
+        
+        # Filter to only parents that have posts or have subcategories with posts
+        result = []
+        for parent in parents:
+            if parent.has_posts():
+                result.append(parent)
+        
+        return result
 
 
 class Tag(models.Model):

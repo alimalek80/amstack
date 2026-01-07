@@ -1,13 +1,13 @@
 <!-- Post Card - Matching Design Mockup -->
-<article class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition">
-    <!-- Header: Tags + Save Button -->
+<article class="bg-white rounded-xl p-5 card-default card-hover">
+    <!-- Header: Category + FREE/PAID + Save Button -->
     <div class="flex items-start justify-between mb-3">
         <div class="flex flex-wrap items-center gap-2">
-            {% for tag in post.tags.all|slice:":1" %}
-            <a href="{% url 'blog:tag_posts' tag.slug %}" class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded">
-                {{ tag.name }}
+            {% if post.category %}
+            <a href="?category={{ post.category.slug }}" class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded">
+                {{ post.category.name }}
             </a>
-            {% endfor %}
+            {% endif %}
             
             {% if post.is_free %}
             <span class="px-2 py-0.5 bg-green-50 text-green-600 text-xs font-medium rounded">FREE</span>
