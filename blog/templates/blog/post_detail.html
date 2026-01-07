@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Amstack{% endblock %}
+
+{% block extra_head %}
+<!-- SEO Meta Tags -->
+<meta name="description" content="{{ post.excerpt }}">
+<meta name="author" content="{% if post.author %}{{ post.author.full_name }}{% else %}Amstack{% endif %}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ post.title }}">
+<meta property="og:description" content="{{ post.excerpt }}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+{% if post.cover_image %}
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">
+{% endif %}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ post.title }}">
+<meta name="twitter:description" content="{{ post.excerpt }}">
+
+<style>
+/* Dark code blocks like the mockup */
+.highlight { 
+    background: #1e293b; 
+    border-radius: 0.5rem; 
+    padding: 1rem; 
+    overflow-x: auto; 
+    margin: 1.5rem 0;
+}
+.highlight pre { margin: 0; color: #e2e8f0; }
+.highlight .hll { background-color: #334155 }
+.highlight .c { color: #94a3b8 } /* Comment */
+.highlight .k { color: #f472b6 } /* Keyword */
+.highlight .o { color: #e2e8f0 } /* Operator */
+.highlight .cm { color: #94a3b8 } /* Comment.Multiline */
+.highlight .cp { color: #f472b6 } /* Comment.Preproc */
+.highlight .c1 { color: #94a3b8 } /* Comment.Single */
+.highlight .cs { color: #94a3b8 } /* Comment.Special */
+.highlight .gd { color: #fca5a5 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gi { color: #86efac } /* Generic.Inserted */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #a78bfa } /* Generic.Subheading */
+.highlight .kc { color: #f472b6 } /* Keyword.Constant */
+.highlight .kd { color: #f472b6 } /* Keyword.Declaration */
+.highlight .kn { color: #f472b6 } /* Keyword.Namespace */
+.highlight .kp { color: #f472b6 } /* Keyword.Pseudo */
+.highlight .kr { color: #f472b6 } /* Keyword.Reserved */
+.highlight .kt { color: #38bdf8 } /* Keyword.Type */
+.highlight .m { color: #fbbf24 } /* Literal.Number */
+.highlight .s { color: #86efac } /* Literal.String */
+.highlight .na { color: #a78bfa } /* Name.Attribute */
+.highlight .nb { color: #38bdf8 } /* Name.Builtin */
+.highlight .nc { color: #38bdf8 } /* Name.Class */
+.highlight .no { color: #fbbf24 } /* Name.Constant */
+.highlight .nd { color: #a78bfa } /* Name.Decorator */
+.highlight .ni { color: #e2e8f0 } /* Name.Entity */
+.highlight .ne { color: #f472b6 } /* Name.Exception */
+.highlight .nf { color: #38bdf8 } /* Name.Function */
+.highlight .nl { color: #fbbf24 } /* Name.Label */
+.highlight .nn { color: #38bdf8 } /* Name.Namespace */
+.highlight .nt { color: #f472b6 } /* Name.Tag */
+.highlight .nv { color: #e2e8f0 } /* Name.Variable */
+.highlight .ow { color: #f472b6 } /* Operator.Word */
+.highlight .w { color: #e2e8f0 } /* Text.Whitespace */
+.highlight .mf { color: #fbbf24 } /* Literal.Number.Float */
+.highlight .mh { color: #fbbf24 } /* Literal.Number.Hex */
+.highlight .mi { color: #fbbf24 } /* Literal.Number.Integer */
+.highlight .mo { color: #fbbf24 } /* Literal.Number.Oct */
+.highlight .sb { color: #86efac } /* Literal.String.Backtick */
+.highlight .sc { color: #86efac } /* Literal.String.Char */
+.highlight .sd { color: #86efac } /* Literal.String.Doc */
+.highlight .s2 { color: #86efac } /* Literal.String.Double */
+.highlight .se { color: #fbbf24 } /* Literal.String.Escape */
+.highlight .sh { color: #86efac } /* Literal.String.Heredoc */
+.highlight .si { color: #38bdf8 } /* Literal.String.Interpol */
+.highlight .sx { color: #86efac } /* Literal.String.Other */
+.highlight .sr { color: #86efac } /* Literal.String.Regex */
+.highlight .s1 { color: #86efac } /* Literal.String.Single */
+.highlight .ss { color: #fbbf24 } /* Literal.String.Symbol */
+.highlight .bp { color: #38bdf8 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #e2e8f0 } /* Name.Variable.Class */
+.highlight .vg { color: #e2e8f0 } /* Name.Variable.Global */
+.highlight .vi { color: #e2e8f0 } /* Name.Variable.Instance */
+.highlight .il { color: #fbbf24 } /* Literal.Number.Integer.Long */
+
+/* Prose typography */
+.prose { max-width: none; }
+.prose h1, .prose h2, .prose h3, .prose h4 { color: #111827; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
+.prose h1 { font-size: 2rem; }
+.prose h2 { font-size: 1.5rem; }
+.prose h3 { font-size: 1.25rem; }
+.prose p { margin-bottom: 1.25rem; line-height: 1.75; color: #374151; }
+.prose a { color: #4f46e5; text-decoration: none; }
+.prose a:hover { text-decoration: underline; }
+.prose ul, .prose ol { margin-bottom: 1.25rem; padding-left: 1.5rem; }
+.prose li { margin-bottom: 0.5rem; color: #374151; }
+.prose ul { list-style-type: disc; }
+.prose ol { list-style-type: decimal; }
+.prose blockquote { border-left: 4px solid #4f46e5; padding-left: 1rem; margin: 1.5rem 0; color: #6b7280; font-style: italic; }
+.prose code { background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.875rem; color: #dc2626; }
+.prose pre code { background: transparent; padding: 0; color: inherit; font-size: 0.875rem; }
+.prose img { border-radius: 0.5rem; margin: 1.5rem 0; }
+.prose strong { color: #111827; font-weight: 600; }
+
+/* Table of contents active state */
+.toc-link.active { color: #4f46e5; font-weight: 500; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white min-h-screen">
+    <!-- Breadcrumb Header -->
+    <div class="bg-gray-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <nav class="flex items-center gap-2 text-sm text-gray-500">
+                <a href="{% url 'core:home' %}" class="hover:text-gray-700">Home</a>
+                <span>/</span>
+                <a href="{% url 'blog:post_list' %}" class="hover:text-gray-700">Blog</a>
+                <span>/</span>
+                {% if post.tags.first %}
+                <a href="{% url 'blog:tag_posts' post.tags.first.slug %}" class="hover:text-gray-700">{{ post.tags.first.name }}</a>
+                <span>/</span>
+                {% endif %}
+                <span class="text-gray-900 truncate max-w-xs">{{ post.title|truncatewords:6 }}</span>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Post Header -->
+    <header class="bg-white border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Tags -->
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                {% for tag in post.tags.all %}
+                <a href="{% url 'blog:tag_posts' tag.slug %}" class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded hover:bg-indigo-100 transition">
+                    {{ tag.name }}
+                </a>
+                {% endfor %}
+                
+                {% if post.is_free %}
+                <span class="px-2.5 py-1 bg-green-50 text-green-600 text-xs font-medium rounded">FREE</span>
+                {% else %}
+                    {% if has_access %}
+                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded">ENROLLED</span>
+                    {% else %}
+                    <span class="px-2.5 py-1 bg-amber-50 text-amber-600 text-xs font-medium rounded">PAID • ${% if post.course %}{{ post.course.price }}{% else %}29{% endif %}</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <!-- Title & Meta Row -->
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div class="flex-1">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{{ post.title }}</h1>
+                    
+                    <!-- Meta -->
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                        <span>{% if post.author %}{{ post.author.full_name }}{% else %}Admin{% endif %}</span>
+                        <span>•</span>
+                        <span>{{ post.published_at|date:"Y-m-d" }}</span>
+                        <span>•</span>
+                        <div class="flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>{{ post.reading_time }} min</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Save Button -->
+                {% if request.user.is_authenticated %}
+                <form action="{% url 'blog:toggle_save' post.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium {% if is_saved %}bg-indigo-50 border-indigo-200 text-indigo-600{% else %}bg-white text-gray-700 hover:bg-gray-50{% endif %} transition">
+                        {% if is_saved %}
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                        Saved
+                        {% else %}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                        Save Tutorial
+                        {% endif %}
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex flex-col lg:flex-row gap-12">
+            <!-- Table of Contents Sidebar -->
+            <aside class="lg:w-56 flex-shrink-0 hidden lg:block">
+                <div class="sticky top-24">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Table of Contents</h3>
+                    <nav class="space-y-2 text-sm" id="toc">
+                        <!-- TOC items populated by JS or manually -->
+                        <a href="#introduction" class="block text-gray-600 hover:text-indigo-600 toc-link">Introduction</a>
+                        {% if not post.is_free and not has_access %}
+                        <a href="#" class="block text-gray-400 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Premium Content
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </aside>
+            
+            <!-- Article Content -->
+            <article class="flex-1 min-w-0">
+                {% if has_access %}
+                <!-- Full Content -->
+                <div class="prose">
+                    {{ post.content_html|safe }}
+                </div>
+                
+                <!-- Tags at bottom -->
+                <div class="mt-12 pt-8 border-t border-gray-200">
+                    <div class="flex flex-wrap gap-2">
+                        {% for tag in post.tags.all %}
+                        <a href="{% url 'blog:tag_posts' tag.slug %}" class="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200 transition">
+                            {{ tag.name|lower }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                {% else %}
+                <!-- Partial Content with Paywall -->
+                <div class="prose">
+                    <h2 id="introduction">Introduction</h2>
+                    <p>{{ post.excerpt }}</p>
+                    
+                    <!-- Teaser content from the actual post -->
+                    <h2>Architecture Overview</h2>
+                    <p>Our SaaS architecture follows modern best practices with a clear separation of concerns:</p>
+                    <ul>
+                        <li><strong>Django</strong> - Backend framework with Django REST Framework for APIs</li>
+                        <li><strong>PostgreSQL</strong> - Production database with proper indexing</li>
+                        <li><strong>Redis</strong> - Caching and session management</li>
+                        <li><strong>Celery</strong> - Background task processing</li>
+                        <li><strong>Tailwind CSS</strong> - Utility-first styling</li>
+                    </ul>
+                </div>
+                
+                <!-- Paywall Overlay -->
+                <div class="relative mt-8">
+                    <!-- Blurred content preview -->
+                    <div class="blur-sm select-none pointer-events-none opacity-60">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">Authentication System</h2>
+                        <p class="text-gray-600 mb-4">We'll implement a complete authentication system with social login (Google, GitHub) and two-factor authentication...</p>
+                        <div class="bg-gray-800 rounded-lg p-4">
+                            <code class="text-green-400">class UserAuthenticationBackend...</code>
+                        </div>
+                    </div>
+                    
+                    <!-- Paywall Modal -->
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 max-w-sm mx-4 text-center">
+                            <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                            
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Unlock Full Tutorial</h3>
+                            <p class="text-gray-600 text-sm mb-4">Get lifetime access to this tutorial and all future updates.</p>
+                            
+                            <div class="text-3xl font-bold text-gray-900 mb-6">
+                                ${% if post.course %}{{ post.course.price }}{% else %}29{% endif %}
+                            </div>
+                            
+                            {% if request.user.is_authenticated %}
+                            <a href="{% if post.course %}{% url 'blog:enroll_course' post.course.slug %}{% else %}#{% endif %}" 
+                               class="block w-full py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
+                                Enroll Now
+                            </a>
+                            {% else %}
+                            <a href="{% url 'accounts:register' %}?next={{ request.path }}" 
+                               class="block w-full py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition mb-3">
+                                Enroll Now
+                            </a>
+                            <p class="text-xs text-gray-500">
+                                Already have an account? <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="text-indigo-600 hover:underline">Sign in</a>
+                            </p>
+                            {% endif %}
+                            
+                            <p class="text-xs text-gray-400 mt-4">30-day money-back guarantee</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tags at bottom -->
+                <div class="mt-32 pt-8 border-t border-gray-200">
+                    <div class="flex flex-wrap gap-2">
+                        {% for tag in post.tags.all %}
+                        <a href="{% url 'blog:tag_posts' tag.slug %}" class="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200 transition">
+                            {{ tag.name|lower }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </article>
+        </div>
+        
+        <!-- More Tutorials Section -->
+        {% if related_posts %}
+        <section class="mt-16 pt-12 border-t border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8">More Tutorials</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                {% for post in related_posts %}
+                <article class="bg-white rounded-xl border border-gray-200 p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        {% for tag in post.tags.all|slice:":1" %}
+                        <span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded">{{ tag.name }}</span>
+                        {% endfor %}
+                        {% if post.is_free %}
+                        <span class="px-2 py-0.5 bg-green-50 text-green-600 text-xs font-medium rounded">FREE</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 bg-amber-50 text-amber-600 text-xs font-medium rounded">PAID</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">
+                        <a href="{{ post.get_absolute_url }}" class="hover:text-indigo-600">{{ post.title }}</a>
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.excerpt }}</p>
+                    <a href="{{ post.get_absolute_url }}" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Read more ›</a>
+                </article>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-8">
+                <a href="{% url 'accounts:dashboard' %}" class="text-gray-600 hover:text-gray-900 text-sm">← Back to Dashboard</a>
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

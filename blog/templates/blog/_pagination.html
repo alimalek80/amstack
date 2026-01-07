@@ -1,0 +1,38 @@
+<!-- Pagination Partial -->
+{% if posts.has_other_pages %}
+<nav class="flex items-center justify-center gap-2 mt-12">
+    {% if posts.has_previous %}
+    <a href="?page={{ posts.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if post_type %}&type={{ post_type }}{% endif %}{% if access %}&access={{ access }}{% endif %}" 
+       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+        ← Previous
+    </a>
+    {% endif %}
+    
+    <div class="flex items-center gap-1">
+        {% for num in posts.paginator.page_range %}
+            {% if posts.number == num %}
+            <span class="px-4 py-2 bg-indigo-600 text-white rounded-lg">{{ num }}</span>
+            {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+            <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if post_type %}&type={{ post_type }}{% endif %}{% if access %}&access={{ access }}{% endif %}" 
+               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                {{ num }}
+            </a>
+            {% elif num == 1 or num == posts.paginator.num_pages %}
+            <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if post_type %}&type={{ post_type }}{% endif %}{% if access %}&access={{ access }}{% endif %}" 
+               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                {{ num }}
+            </a>
+            {% elif num == 2 or num == posts.paginator.num_pages|add:'-1' %}
+            <span class="px-2 text-gray-400">...</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    {% if posts.has_next %}
+    <a href="?page={{ posts.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if post_type %}&type={{ post_type }}{% endif %}{% if access %}&access={{ access }}{% endif %}" 
+       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+        Next →
+    </a>
+    {% endif %}
+</nav>
+{% endif %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ tag.name }} Tutorials - Amstack{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="Browse all {{ tag.name }} tutorials and articles on Amstack.">
+{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <section class="bg-white border-b border-gray-200 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-flex items-center px-4 py-2 bg-{{ tag.color }}-100 text-{{ tag.color }}-700 rounded-full text-sm font-medium mb-4">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                Topic
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ tag.name }}</h1>
+            <p class="text-xl text-gray-600">{{ posts.paginator.count }} tutorial{% if posts.paginator.count != 1 %}s{% endif %} available</p>
+        </div>
+    </section>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Back Link -->
+        <div class="mb-8">
+            <a href="{% url 'blog:post_list' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to all tutorials
+            </a>
+        </div>
+        
+        <!-- Posts Grid -->
+        {% if posts %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for post in posts %}
+            {% include 'blog/_post_card.html' %}
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% include 'blog/_pagination.html' %}
+        
+        {% else %}
+        <div class="text-center py-16">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No tutorials yet</h3>
+            <p class="text-gray-600 mb-6">Check back soon for {{ tag.name }} tutorials</p>
+            <a href="{% url 'blog:post_list' %}" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
+                Browse all tutorials
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
