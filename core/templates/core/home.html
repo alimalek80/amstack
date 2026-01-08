@@ -23,197 +23,208 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="bg-gradient-to-b from-gray-50 to-white py-20 lg:py-32">
+<section class="bg-gradient-to-b from-indigo-950 via-indigo-900 to-indigo-800 py-20 lg:py-32">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 mb-6">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-400/20 text-indigo-200 mb-6">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.753 2 16.5S6.5 26.75 12 26.75s10-4.5 10-10.25S17.5 6.253 12 6.253z"/>
             </svg>
-            Django & AI Development
+            Learn Django, Python & Web Development
         </span>
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-            Build Better Apps<br>
-            <span class="text-indigo-600">Faster</span>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+            Master Web Development<br>
+            <span class="text-indigo-300">Through Practical Tutorials</span>
         </h1>
-        <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Django • AI • Automation • Clean Web Apps. I help startups and developers build production-ready applications.
+        <p class="text-lg md:text-xl text-indigo-100 max-w-2xl mx-auto mb-8">
+            Deep dives into Django, Python, AI, and modern web development. From MVP to production-grade apps.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#services" class="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
-                View Services
+            <a href="#tutorials" class="inline-flex items-center justify-center px-6 py-3 bg-indigo-500 text-white font-medium rounded-full hover:bg-indigo-600 transition">
+                Start Learning
                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>
             </a>
-            <a href="#contact" class="inline-flex items-center justify-center px-6 py-3 bg-white text-gray-700 font-medium rounded-full border border-gray-300 hover:bg-gray-50 transition">
-                Hire Me
+            <a href="{% url 'blog:post_list' %}" class="inline-flex items-center justify-center px-6 py-3 bg-white/10 text-white font-medium rounded-full border border-indigo-400/30 hover:bg-white/20 transition">
+                Browse All Posts
             </a>
         </div>
     </div>
 </section>
 
-<!-- Featured Services Section -->
-<section id="services" class="py-20 bg-white">
+<!-- Featured Tutorials Section -->
+<section id="featured" class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Featured Services</h2>
-            <p class="text-gray-600">Turn your ideas into production-ready applications</p>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Featured Tutorials</h2>
+            <p class="text-gray-600">Hand-picked tutorials to level up your skills</p>
         </div>
         
+        {% if featured_posts %}
         <div class="grid md:grid-cols-3 gap-8">
-            <!-- Service Card 1 -->
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
-                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Django MVP Build</h3>
-                <p class="text-gray-600 text-sm mb-4">Launch your MVP in 2-4 weeks</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-900 font-semibold">From $2500</span>
-                    <a href="#" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Learn more →</a>
-                </div>
-            </div>
-            
-            <!-- Service Card 2 -->
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
-                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">API Development (REST)</h3>
-                <p class="text-gray-600 text-sm mb-4">Scalable API architecture</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-900 font-semibold">From $1500</span>
-                    <a href="#" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Learn more →</a>
-                </div>
-            </div>
-            
-            <!-- Service Card 3 -->
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
-                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Chatbot Integration</h3>
-                <p class="text-gray-600 text-sm mb-4">Smart AI assistants for your app</p>
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-900 font-semibold">From $2000</span>
-                    <a href="#" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Learn more →</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="text-center mt-10">
-            <a href="#" class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-full text-gray-700 font-medium hover:bg-gray-50 transition">
-                View All Services
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Coding Tutorials Section -->
-<section class="py-20 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Coding Tutorials</h2>
-            <p class="text-gray-600">Learn Django, Python, and modern web development</p>
-        </div>
-        
-        <div class="grid md:grid-cols-3 gap-8">
-            {% for post in latest_posts %}
+            {% for post in featured_posts %}
             <!-- Tutorial Card -->
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
-                <div class="flex gap-2 mb-4">
-                    {% if post.category %}
-                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">{{ post.category.name }}</span>
-                    {% endif %}
-                    {% if post.is_free %}
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
-                    {% else %}
-                    <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded">PAID</span>
-                    {% endif %}
+            <div class="bg-white rounded-xl overflow-hidden card-default card-hover">
+                {% if post.cover_image %}
+                <div class="h-48 bg-gradient-to-br from-indigo-400 to-indigo-600 overflow-hidden">
+                    <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover">
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">
-                    <a href="{{ post.get_absolute_url }}" class="hover:text-indigo-600 transition">
-                        {{ post.title }}
-                    </a>
-                </h3>
-                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.excerpt }}</p>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">{{ post.reading_time }} min</span>
-                    <a href="{{ post.get_absolute_url }}" class="text-indigo-600 font-medium hover:text-indigo-700">{% if post.is_free %}Read →{% else %}Enroll to read →{% endif %}</a>
-                </div>
-            </div>
-            {% empty %}
-            <!-- Fallback if no posts exist -->
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
-                <div class="flex gap-2 mb-4">
-                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">Django</span>
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Building a Django REST API with JWT Authentication</h3>
-                <p class="text-gray-600 text-sm mb-4">Learn how to build a secure REST API with Django REST Framework and implement JWT authentication...</p>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">12 min</span>
-                    <a href="#" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
-                <div class="flex gap-2 mb-4">
-                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">Django</span>
-                    <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded">PAID</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Production-Grade Django + Tailwind SaaS Architecture</h3>
-                <p class="text-gray-600 text-sm mb-4">A comprehensive guide to building production-ready SaaS applications with Django, Tailwind CSS, and...</p>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">25 min</span>
-                    <a href="#" class="text-indigo-600 font-medium hover:text-indigo-700">Enroll to read →</a>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
-                <div class="flex gap-2 mb-4">
-                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded">Python</span>
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Ethical Web Scraping with Python</h3>
-                <p class="text-gray-600 text-sm mb-4">Build robust web scrapers with BeautifulSoup and Scrapy. Handle JavaScript-rendered content and...</p>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">15 min</span>
-                    <a href="#" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
+                {% else %}
+                <div class="h-48 bg-gradient-to-br from-indigo-400 to-indigo-600"></div>
+                {% endif %}
+                <div class="p-6">
+                    <div class="flex gap-2 mb-3">
+                        {% if post.category %}
+                        <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">{{ post.category.name }}</span>
+                        {% endif %}
+                        {% if post.post_type %}
+                        <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded">{{ post.get_post_type_display }}</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        <a href="{{ post.get_absolute_url }}" class="hover:text-indigo-600 transition">
+                            {{ post.title }}
+                        </a>
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.excerpt }}</p>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">{{ post.reading_time }} min read</span>
+                        <a href="{{ post.get_absolute_url }}" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
+                    </div>
                 </div>
             </div>
             {% endfor %}
         </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Latest Tutorials Section -->
+<section id="tutorials" class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Latest Tutorials & Articles</h2>
+            <p class="text-gray-600">Discover practical guides on Django, Python, and web development</p>
+        </div>
+        
+        {% if latest_posts %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for post in latest_posts %}
+            <!-- Tutorial Card -->
+            <div class="bg-white rounded-xl overflow-hidden card-default card-hover">
+                {% if post.cover_image %}
+                <div class="h-40 bg-gradient-to-br from-indigo-400 to-indigo-600 overflow-hidden">
+                    <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover">
+                </div>
+                {% else %}
+                <div class="h-40 bg-gradient-to-br from-indigo-400 to-indigo-600"></div>
+                {% endif %}
+                <div class="p-6">
+                    <div class="flex gap-2 mb-3 flex-wrap">
+                        {% if post.category %}
+                        <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">{{ post.category.name }}</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="text-base font-semibold text-gray-900 mb-2">
+                        <a href="{{ post.get_absolute_url }}" class="hover:text-indigo-600 transition">
+                            {{ post.title|truncatewords:15 }}
+                        </a>
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.excerpt }}</p>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">{{ post.reading_time }} min</span>
+                        <a href="{{ post.get_absolute_url }}" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-xl p-8 text-center card-default">
+            <p class="text-gray-600">More tutorials coming soon. Subscribe to stay updated!</p>
+        </div>
+        {% endif %}
         
         <div class="text-center mt-10">
             <a href="{% url 'blog:post_list' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 bg-white rounded-full text-gray-700 font-medium hover:bg-gray-50 transition">
-                Browse All Tutorials
+                View All Tutorials
             </a>
         </div>
     </div>
 </section>
 
+<!-- Quick Access to Services Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Need Custom Development?</h2>
+            <p class="text-gray-600">Explore professional services to bring your ideas to life</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Service Card 1 -->
+            <div class="bg-white rounded-xl p-6 card-default card-hover border border-gray-200">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Django MVP Build</h3>
+                <p class="text-gray-600 text-sm mb-4">Turn your idea into a production-ready application in 2-4 weeks</p>
+                <a href="{% url 'services:service_list' %}" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Explore →</a>
+            </div>
+            
+            <!-- Service Card 2 -->
+            <div class="bg-white rounded-xl p-6 card-default card-hover border border-gray-200">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">API Development</h3>
+                <p class="text-gray-600 text-sm mb-4">Build scalable REST APIs and backend systems with Django and Python</p>
+                <a href="{% url 'services:service_list' %}" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Explore →</a>
+            </div>
+            
+            <!-- Service Card 3 -->
+            <div class="bg-white rounded-xl p-6 card-default card-hover border border-gray-200">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">AI Integration</h3>
+                <p class="text-gray-600 text-sm mb-4">Add intelligent features and AI-powered assistants to your application</p>
+                <a href="{% url 'services:service_list' %}" class="text-indigo-600 text-sm font-medium hover:text-indigo-700">Explore →</a>
+            </div>
+        </div>
+        
+        <div class="text-center mt-10">
+            <a href="{% url 'services:service_list' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-full text-gray-700 font-medium hover:bg-gray-50 transition">
+                Browse All Services
+            </a>
+        </div>
+    </div>
+</section>
+
+
 <!-- Newsletter Section -->
 <section class="py-16 bg-indigo-600">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Stay Updated</h2>
-        <p class="text-indigo-100 mb-8">Get weekly tips on Django, Python, and building better web apps.</p>
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Stay Updated with New Tutorials</h2>
+        <p class="text-indigo-100 mb-8 max-w-2xl mx-auto">Get weekly tips on Django, Python, web development, and practical coding tutorials delivered to your inbox.</p>
         <form class="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
             <input 
                 type="email" 
-                placeholder="Enter your email" 
+                placeholder="your@email.com" 
                 class="flex-grow px-4 py-3 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                required
             >
-            <button type="submit" class="px-6 py-3 bg-white text-indigo-600 font-medium rounded-full hover:bg-gray-100 transition">
+            <button type="submit" class="px-6 py-3 bg-white text-indigo-600 font-medium rounded-full hover:bg-indigo-50 transition">
                 Subscribe
             </button>
         </form>
+        <p class="text-indigo-100 text-sm mt-4">No spam. Unsubscribe anytime.</p>
     </div>
 </section>
 
@@ -221,65 +232,69 @@
 <section class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">What Clients Say</h2>
-            <p class="text-gray-600">Trusted by startups and developers worldwide</p>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">What Developers Say</h2>
+            <p class="text-gray-600">Trusted by developers and teams worldwide</p>
         </div>
         
         <div class="grid md:grid-cols-3 gap-8">
             <!-- Testimonial 1 -->
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
+            <div class="bg-white rounded-xl p-6 card-default card-hover border border-gray-200">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-semibold mr-3">SC</div>
                     <div>
                         <h4 class="font-semibold text-gray-900">Sarah Chen</h4>
-                        <p class="text-sm text-gray-500">CTO, TechStartup</p>
+                        <p class="text-sm text-gray-500">Full-stack Developer</p>
                     </div>
                 </div>
-                <p class="text-gray-600 italic">"Delivered our MVP in record time. Clean code, great communication, and the app just works."</p>
+                <p class="text-gray-600 italic">"The tutorials here taught me how to properly structure Django projects. Game changer for my skill level."</p>
             </div>
             
             <!-- Testimonial 2 -->
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
+            <div class="bg-white rounded-xl p-6 card-default card-hover border border-gray-200">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold mr-3">MR</div>
                     <div>
                         <h4 class="font-semibold text-gray-900">Michael Ross</h4>
-                        <p class="text-sm text-gray-500">Founder, DataFlow</p>
+                        <p class="text-sm text-gray-500">Startup Founder</p>
                     </div>
                 </div>
-                <p class="text-gray-600 italic">"The API architecture was exactly what we needed. Scalable, well-documented, and production-ready."</p>
+                <p class="text-gray-600 italic">"Clear explanations, production-ready code samples, and practical examples. Exactly what I needed to launch my MVP."</p>
             </div>
             
             <!-- Testimonial 3 -->
-            <div class="bg-white rounded-xl p-6 card-default card-hover">
+            <div class="bg-white rounded-xl p-6 card-default card-hover border border-gray-200">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center font-semibold mr-3">EW</div>
                     <div>
                         <h4 class="font-semibold text-gray-900">Emma Wilson</h4>
-                        <p class="text-sm text-gray-500">Product Manager, FinApp</p>
+                        <p class="text-sm text-gray-500">Technical Lead</p>
                     </div>
                 </div>
-                <p class="text-gray-600 italic">"Transformed our slow Django app into a lightning-fast experience. Highly recommended!"</p>
+                <p class="text-gray-600 italic">"Best resource for learning modern Django patterns. Bookmarked every tutorial and shared with my entire team."</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- CTA Section -->
-<section id="contact" class="py-20 bg-gray-50">
+<section class="py-20 bg-gray-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="bg-white rounded-2xl p-8 md:p-12 card-default card-hover">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to Build Something Great?</h2>
-            <p class="text-gray-600 mb-8">Let's discuss your project and see how I can help bring your ideas to life.</p>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
+            <p class="text-gray-600 mb-8 max-w-2xl mx-auto">Dive into tutorials, build your next project, or hire me for custom development. Choose what works best for you.</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="#" class="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
-                    Start a Project
+                <a href="{% url 'blog:post_list' %}" class="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
+                    Browse Tutorials
                 </a>
-                <a href="#services" class="inline-flex items-center justify-center px-6 py-3 text-gray-700 font-medium hover:text-gray-900 transition">
-                    Explore Services
+                <a href="{% url 'services:service_list' %}" class="inline-flex items-center justify-center px-6 py-3 text-indigo-600 font-medium border border-indigo-600 rounded-full hover:bg-indigo-50 transition">
+                    View Services
+                </a>
+                <a href="{% url 'leads:lead_create' %}" class="inline-flex items-center justify-center px-6 py-3 bg-white text-gray-700 font-medium border border-gray-300 rounded-full hover:bg-gray-50 transition">
+                    Hire Me
                 </a>
             </div>
         </div>
     </div>
 </section>
+
 {% endblock %}

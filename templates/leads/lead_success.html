@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Request Sent - Amstack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <section class="bg-indigo-950 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Breadcrumb -->
+            <nav class="flex items-center gap-2 text-sm text-indigo-300 mb-4">
+                <a href="{% url 'core:home' %}" class="hover:text-white">Home</a>
+                <span>/</span>
+                <span class="text-white">Success</span>
+            </nav>
+            
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">Request Received!</h1>
+            <p class="text-indigo-200 text-lg">Thank you for reaching out. I'm reviewing your project details.</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Success Card -->
+        <div class="bg-white rounded-2xl shadow-md p-8 text-center">
+            <!-- Success Icon -->
+            <div class="mb-6 flex justify-center">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Main Message -->
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">Thank You!</h2>
+            <p class="text-gray-600 text-lg mb-8">
+                Your project inquiry has been successfully submitted. I've received all the details and will review them carefully.
+            </p>
+
+            <!-- Next Steps -->
+            <div class="bg-indigo-50 rounded-lg p-6 mb-8 text-left border border-indigo-200">
+                <h3 class="text-lg font-bold text-indigo-950 mb-4">What happens next?</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</span>
+                        <div>
+                            <p class="font-semibold text-gray-900">Confirmation</p>
+                            <p class="text-sm text-gray-600">You'll receive an email confirmation of your inquiry within the hour.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</span>
+                        <div>
+                            <p class="font-semibold text-gray-900">Review & Response</p>
+                            <p class="text-sm text-gray-600">I'll review your project details and respond with a custom proposal within 24 hours.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</span>
+                        <div>
+                            <p class="font-semibold text-gray-900">Discussion</p>
+                            <p class="text-sm text-gray-600">We can discuss your requirements, timeline, and budget in detail via email or call.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</span>
+                        <div>
+                            <p class="font-semibold text-gray-900">Get Started</p>
+                            <p class="text-sm text-gray-600">Once we align on scope and timeline, we'll kick off the project with a clear roadmap.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-8 text-left">
+                <h3 class="font-bold text-gray-900 mb-3">Quick tips for a faster response:</h3>
+                <ul class="space-y-2 text-sm text-gray-700">
+                    <li>✓ Check your spam/promotions folder for my reply</li>
+                    <li>✓ Include a link to any existing code, design files, or documentation</li>
+                    <li>✓ Be specific about your goals and the problem you're solving</li>
+                    <li>✓ Share your preferred communication channel (email, phone, Zoom)</li>
+                </ul>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'services:service_list' %}" class="inline-block px-6 py-3 text-center text-white bg-indigo-600 rounded-full font-semibold hover:bg-indigo-700 transition-colors">
+                    ← Back to Services
+                </a>
+                <a href="{% url 'blog:post_list' %}" class="inline-block px-6 py-3 text-center text-gray-700 bg-gray-200 rounded-full font-semibold hover:bg-gray-300 transition-colors">
+                    Read My Blog →
+                </a>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="mt-12">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Common Questions</h3>
+            
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <details class="bg-white rounded-lg shadow-sm p-6 cursor-pointer group">
+                    <summary class="flex items-center justify-between font-semibold text-gray-900 hover:text-indigo-600 transition-colors">
+                        <span>What's your typical response time?</span>
+                        <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-600 mt-4">I typically respond within 24 hours. If it's after hours, you'll hear from me the next business day.</p>
+                </details>
+
+                <!-- FAQ Item 2 -->
+                <details class="bg-white rounded-lg shadow-sm p-6 cursor-pointer group">
+                    <summary class="flex items-center justify-between font-semibold text-gray-900 hover:text-indigo-600 transition-colors">
+                        <span>Do you work on ongoing projects?</span>
+                        <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-600 mt-4">Yes! I work on both one-off projects and long-term engagements. We can discuss what works best for your needs.</p>
+                </details>
+
+                <!-- FAQ Item 3 -->
+                <details class="bg-white rounded-lg shadow-sm p-6 cursor-pointer group">
+                    <summary class="flex items-center justify-between font-semibold text-gray-900 hover:text-indigo-600 transition-colors">
+                        <span>What if I have more questions before we talk?</span>
+                        <svg class="w-5 h-5 text-gray-600 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-600 mt-4">Feel free to include any questions in your message or reach out to me directly. I'm happy to clarify anything.</p>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Lead Details - Amstack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <section class="bg-indigo-950 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Breadcrumb -->
+            <nav class="flex items-center gap-2 text-sm text-indigo-300 mb-4">
+                <a href="{% url 'core:home' %}" class="hover:text-white">Home</a>
+                <span>/</span>
+                <a href="{% url 'leads:lead_list' %}" class="hover:text-white">Leads</a>
+                <span>/</span>
+                <span class="text-white">{{ lead.full_name }}</span>
+            </nav>
+            
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">Lead Details</h1>
+            <p class="text-indigo-200 text-lg">Review and manage this inquiry</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Lead Details -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Basic Info Card -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Full Name -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Full Name</p>
+                            <p class="text-lg text-gray-900 font-semibold mt-1">{{ lead.full_name }}</p>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Email</p>
+                            <p class="text-lg text-gray-900 mt-1">
+                                <a href="mailto:{{ lead.email }}" class="text-indigo-600 hover:text-indigo-700 font-semibold">
+                                    {{ lead.email }}
+                                </a>
+                            </p>
+                        </div>
+                        
+                        <!-- Phone -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Phone</p>
+                            {% if lead.phone %}
+                            <p class="text-lg text-gray-900 mt-1">
+                                <a href="tel:{{ lead.phone }}" class="text-indigo-600 hover:text-indigo-700 font-semibold">
+                                    {{ lead.phone }}
+                                </a>
+                            </p>
+                            {% else %}
+                            <p class="text-lg text-gray-500 mt-1">—</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Company -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Company</p>
+                            <p class="text-lg text-gray-900 mt-1">{{ lead.company|default:"—" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Details Card -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Project Details</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Service -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Service</p>
+                            <div class="mt-1">
+                                {% if lead.service_title %}
+                                <p class="text-lg text-gray-900 font-semibold">{{ lead.service_title }}</p>
+                                {% endif %}
+                                {% if lead.service_slug %}
+                                <p class="text-sm text-gray-600">{{ lead.service_slug }}</p>
+                                {% endif %}
+                                {% if not lead.service_title and not lead.service_slug %}
+                                <p class="text-lg text-gray-500">—</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Budget -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Budget</p>
+                            <p class="text-lg text-gray-900 mt-1 font-semibold">{{ lead.budget|default:"—" }}</p>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Timeline</p>
+                            <p class="text-lg text-gray-900 mt-1 font-semibold">{{ lead.timeline|default:"—" }}</p>
+                        </div>
+
+                        <!-- Message -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Project Message</p>
+                            <div class="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <p class="text-gray-900 whitespace-pre-wrap">{{ lead.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Source & Timestamps Card -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Additional Information</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Source -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Source</p>
+                            <p class="text-lg text-gray-900 mt-1 font-semibold">{{ lead.get_source_display|default:lead.source|default:"—" }}</p>
+                        </div>
+
+                        <!-- Created At -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Submitted</p>
+                            <p class="text-lg text-gray-900 mt-1">{{ lead.created_at|date:"M d, Y" }}</p>
+                            <p class="text-sm text-gray-600">{{ lead.created_at|time:"g:i A" }}</p>
+                        </div>
+
+                        <!-- Updated At -->
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Last Updated</p>
+                            <p class="text-lg text-gray-900 mt-1">{{ lead.updated_at|date:"M d, Y" }}</p>
+                            <p class="text-sm text-gray-600">{{ lead.updated_at|time:"g:i A" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Status & Actions -->
+            <div class="lg:col-span-1">
+                <!-- Status Update Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Update Status</h2>
+                    
+                    <!-- Current Status Badge -->
+                    <div class="mb-6">
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Current Status</p>
+                        {% if lead.status == 'new' %}
+                            <span class="inline-block px-4 py-2 bg-red-100 text-red-800 rounded-lg text-sm font-bold">New</span>
+                        {% elif lead.status == 'contacted' %}
+                            <span class="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-lg text-sm font-bold">Contacted</span>
+                        {% elif lead.status == 'qualified' %}
+                            <span class="inline-block px-4 py-2 bg-cyan-100 text-cyan-800 rounded-lg text-sm font-bold">Qualified</span>
+                        {% elif lead.status == 'won' %}
+                            <span class="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-bold">Won</span>
+                        {% elif lead.status == 'lost' %}
+                            <span class="inline-block px-4 py-2 bg-gray-100 text-gray-800 rounded-lg text-sm font-bold">Lost</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Status Update Form -->
+                    <form method="post" class="space-y-4">
+                        {% csrf_token %}
+                        
+                        <div>
+                            <label for="id_status" class="block text-sm font-semibold text-gray-700 mb-2">Change Status</label>
+                            {{ status_form.status }}
+                        </div>
+                        
+                        <button type="submit" class="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold">
+                            Update Status
+                        </button>
+                    </form>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-6 pt-6 border-t border-gray-200 space-y-3">
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Quick Actions</p>
+                        
+                        <a href="mailto:{{ lead.email }}" class="block w-full px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-center font-semibold text-sm">
+                            ✉ Send Email
+                        </a>
+                        
+                        {% if lead.phone %}
+                        <a href="tel:{{ lead.phone }}" class="block w-full px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-center font-semibold text-sm">
+                            ☎ Call Lead
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'leads:lead_list' %}" class="block w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-center font-semibold text-sm">
+                            ← Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
