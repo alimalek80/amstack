@@ -1,0 +1,85 @@
+{% load static %}
+
+<div class="bg-white rounded-2xl border border-gray-200 overflow-hidden card-default card-hover flex flex-col h-full p-6">
+    <!-- Header: Icon and Best Seller Badge -->
+    <div class="flex items-start justify-between mb-4">
+        <!-- Icon in Rounded Box -->
+        <div class="flex-shrink-0">
+            <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-2xl">
+                {% if service.pricing_type == 'fixed' %}
+                💳
+                {% elif service.pricing_type == 'hourly' %}
+                ⏱️
+                {% else %}
+                📊
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Best Seller Badge -->
+        {% if service.is_featured %}
+        <span class="text-sm font-bold text-indigo-600">
+            Best Seller
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Content -->
+    <div class="flex-grow flex flex-col mb-4">
+        <!-- Title -->
+        <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
+            {{ service.title }}
+        </h3>
+
+        <!-- Short Description -->
+        <p class="text-gray-600 text-sm line-clamp-3">
+            {{ service.short_description }}
+        </p>
+    </div>
+
+    <!-- Pricing Section -->
+    <div class="flex items-end justify-between mb-6 pb-6 border-b border-gray-200">
+        <!-- Price Info -->
+        <div>
+            <p class="text-xs text-gray-500 font-semibold mb-1 uppercase tracking-wide">
+                {% if service.pricing_type == 'starting_at' %}
+                Starting at
+                {% elif service.pricing_type == 'fixed' %}
+                Fixed Price
+                {% elif service.pricing_type == 'hourly' %}
+                Hourly Rate
+                {% endif %}
+            </p>
+            <p class="text-3xl font-bold text-gray-900">
+                {% if service.pricing_type == 'starting_at' and service.starting_price %}
+                ${{ service.starting_price|floatformat:0 }}
+                {% elif service.pricing_type == 'fixed' and service.fixed_price %}
+                ${{ service.fixed_price|floatformat:0 }}
+                {% elif service.pricing_type == 'hourly' and service.starting_price %}
+                ${{ service.starting_price|floatformat:0 }}
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Timeline -->
+        {% if service.timeline %}
+        <div class="text-right">
+            <p class="text-sm text-gray-500 font-medium">
+                {{ service.timeline }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- CTA Buttons (In One Line) -->
+    <div class="flex gap-3">
+        <a href="{% url 'services:service_detail' service.slug %}"
+           class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-full text-center transition-colors duration-200">
+            Details
+        </a>
+        <a href="{% url 'services:service_detail' service.slug %}#hire"
+           class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-full text-center transition-colors duration-200">
+            Hire Me
+        </a>
+    </div>
+</div>
