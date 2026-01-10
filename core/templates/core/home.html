@@ -64,15 +64,7 @@
         <div class="grid md:grid-cols-3 gap-8">
             {% for post in featured_posts %}
             <!-- Tutorial Card -->
-            <div class="bg-white rounded-xl overflow-hidden card-default card-hover">
-                {% if post.cover_image %}
-                <div class="h-48 bg-gradient-to-br from-indigo-400 to-indigo-600 overflow-hidden">
-                    <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover">
-                </div>
-                {% else %}
-                <div class="h-48 bg-gradient-to-br from-indigo-400 to-indigo-600"></div>
-                {% endif %}
-                <div class="p-6">
+            <div class="bg-white rounded-xl p-6 card-default card-hover">
                     <div class="flex gap-2 mb-3">
                         {% if post.category %}
                         <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">{{ post.category.name }}</span>
@@ -111,30 +103,21 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for post in latest_posts %}
             <!-- Tutorial Card -->
-            <div class="bg-white rounded-xl overflow-hidden card-default card-hover">
-                {% if post.cover_image %}
-                <div class="h-40 bg-gradient-to-br from-indigo-400 to-indigo-600 overflow-hidden">
-                    <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover">
+            <div class="bg-white rounded-xl p-6 card-default card-hover h-full flex flex-col">
+                <div class="flex gap-2 mb-3 flex-wrap">
+                    {% if post.category %}
+                    <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">{{ post.category.name }}</span>
+                    {% endif %}
                 </div>
-                {% else %}
-                <div class="h-40 bg-gradient-to-br from-indigo-400 to-indigo-600"></div>
-                {% endif %}
-                <div class="p-6">
-                    <div class="flex gap-2 mb-3 flex-wrap">
-                        {% if post.category %}
-                        <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">{{ post.category.name }}</span>
-                        {% endif %}
-                    </div>
-                    <h3 class="text-base font-semibold text-gray-900 mb-2">
-                        <a href="{{ post.get_absolute_url }}" class="hover:text-indigo-600 transition">
-                            {{ post.title|truncatewords:15 }}
-                        </a>
-                    </h3>
-                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.excerpt }}</p>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">{{ post.reading_time }} min</span>
-                        <a href="{{ post.get_absolute_url }}" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
-                    </div>
+                <h3 class="text-base font-semibold text-gray-900 mb-2 flex-grow">
+                    <a href="{{ post.get_absolute_url }}" class="hover:text-indigo-600 transition">
+                        {{ post.title|truncatewords:15 }}
+                    </a>
+                </h3>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.excerpt }}</p>
+                <div class="flex items-center justify-between text-sm mt-auto">
+                    <span class="text-gray-500">{{ post.reading_time }} min</span>
+                    <a href="{{ post.get_absolute_url }}" class="text-indigo-600 font-medium hover:text-indigo-700">Read →</a>
                 </div>
             </div>
             {% endfor %}
