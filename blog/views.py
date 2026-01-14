@@ -10,7 +10,8 @@ from .models import Post, Tag, Category, Course, SavedPost, CourseEnrollment
 
 def post_list(request):
     """List all published blog posts with search and filtering."""
-    posts = Post.objects.filter(is_published=True)
+    # Exclude posts that are part of a course (show only standalone blog posts)
+    posts = Post.objects.filter(is_published=True, course__isnull=True)
     
     # Search functionality
     query = request.GET.get('q', '')
@@ -106,8 +107,22 @@ def post_detail(request, slug):
     
     # Course lessons if part of a course
     course_lessons = []
+    previous_lesson = None
+    next_lesson = None
+    
     if post.course:
         course_lessons = post.course.posts.filter(is_published=True).order_by('order')
+        
+        # Get previous and next lesson
+        lesson_list = list(course_lessons)
+        try:
+            current_index = lesson_list.index(post)
+            if current_index > 0:
+                previous_lesson = lesson_list[current_index - 1]
+            if current_index < len(lesson_list) - 1:
+                next_lesson = lesson_list[current_index + 1]
+        except ValueError:
+            pass
     
     context = {
         'post': post,
@@ -115,6 +130,8 @@ def post_detail(request, slug):
         'is_saved': is_saved,
         'related_posts': related_posts,
         'course_lessons': course_lessons,
+        'previous_lesson': previous_lesson,
+        'next_lesson': next_lesson,
     }
     return render(request, 'blog/post_detail.html', context)
 

@@ -83,7 +83,26 @@ def dashboard_view(request):
 @login_required
 def saved_tutorials_view(request):
     """View saved tutorials."""
-    return render(request, 'accounts/saved_tutorials.html')
+    from blog.models import SavedPost
+    from django.core.paginator import Paginator
+    
+    # Get user's saved posts
+    saved_posts_queryset = SavedPost.objects.filter(user=request.user).select_related('post').order_by('-saved_at')
+    
+    # Pagination
+    paginator = Paginator(saved_posts_queryset, 12)
+    page = request.GET.get('page', 1)
+    saved_posts_page = paginator.get_page(page)
+    
+    context = {
+        'user': request.user,
+        'profile': request.user.profile,
+        'saved_posts': saved_posts_page,
+        'total_saved': paginator.count,
+        'is_paginated': paginator.num_pages > 1,
+        'page_obj': saved_posts_page,
+    }
+    return render(request, 'accounts/saved_tutorials.html', context)
 
 
 @login_required

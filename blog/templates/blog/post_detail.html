@@ -327,6 +327,41 @@
                         {% endfor %}
                     </div>
                 </div>
+                
+                <!-- Course Navigation Buttons -->
+                {% if post.course %}
+                <div class="mt-12 pt-8 border-t border-gray-200">
+                    <div class="flex items-center justify-between gap-4">
+                        {% if previous_lesson %}
+                        <a href="{{ previous_lesson.get_absolute_url }}" class="flex-1 flex items-center gap-3 px-6 py-4 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition group">
+                            <svg class="w-5 h-5 group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            <div class="text-left">
+                                <div class="text-xs text-indigo-500 font-medium">Previous Lesson</div>
+                                <div class="font-semibold line-clamp-2">{{ previous_lesson.title }}</div>
+                            </div>
+                        </a>
+                        {% else %}
+                        <div class="flex-1"></div>
+                        {% endif %}
+                        
+                        {% if next_lesson %}
+                        <a href="{{ next_lesson.get_absolute_url }}" class="flex-1 flex items-center justify-end gap-3 px-6 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition group">
+                            <div class="text-right">
+                                <div class="text-xs text-indigo-200 font-medium">Next Lesson</div>
+                                <div class="font-semibold line-clamp-2">{{ next_lesson.title }}</div>
+                            </div>
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                        {% else %}
+                        <div class="flex-1"></div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
                 {% endif %}
             </article>
         </div>
