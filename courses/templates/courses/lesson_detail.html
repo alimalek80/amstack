@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - {{ post.course.title }} | Amstack{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ post.excerpt }}">
+<meta property="og:title" content="{{ post.title }}">
+<meta property="og:description" content="{{ post.excerpt }}">
+{% if post.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+    <!-- Lesson Header -->
+    <section class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+            <!-- Breadcrumb -->
+            <nav class="flex items-center gap-2 text-sm text-gray-500">
+                <a href="{% url 'core:home' %}" class="hover:text-gray-700">Home</a>
+                <span>/</span>
+                <a href="{% url 'courses:course_list' %}" class="hover:text-gray-700">Courses</a>
+                <span>/</span>
+                <a href="{% url 'courses:course_detail' post.course.slug %}" class="hover:text-gray-700">{{ post.course.title }}</a>
+                <span>/</span>
+                <span class="text-gray-900">{{ post.title }}</span>
+            </nav>
+
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                        {% if post.course.is_free or post.is_free %}
+                        <span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">FREE</span>
+                        {% else %}
+                        <span class="px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded">PAID</span>
+                        {% endif %}
+
+                        {% if is_enrolled %}
+                        <span class="px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">ENROLLED</span>
+                        {% endif %}
+
+                        <span class="text-sm text-gray-500">{{ post.reading_time }} min read</span>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ post.title }}</h1>
+                    <p class="text-gray-600">Part of {{ post.course.title }}</p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    {% if not has_access %}
+                        {% if request.user.is_authenticated %}
+                        <a href="{% url 'courses:enroll_course' post.course.slug %}" class="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-700 transition shadow">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Enroll to unlock
+                        </a>
+                        {% else %}
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-700 transition shadow">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.657-1.567-3-3.5-3S5 9.343 5 11s1.567 3 3.5 3S12 12.657 12 11zm0 0V6a4 4 0 118 0v5" />
+                            </svg>
+                            Login to unlock
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        {% if next_lesson %}
+                        <a href="{{ next_lesson.get_absolute_url }}" class="inline-flex items-center gap-2 px-5 py-2 bg-gray-100 text-gray-800 font-semibold rounded-full hover:bg-gray-200 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                            Next lesson
+                        </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid lg:grid-cols-3 gap-10">
+        <article class="lg:col-span-2 space-y-8">
+            {% if has_access %}
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                <div class="prose max-w-none">
+                    {{ post.content_html|safe }}
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
+                {% if previous_lesson %}
+                <a href="{{ previous_lesson.get_absolute_url }}" class="flex-1 flex items-center gap-3 px-5 py-4 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <div class="text-left">
+                        <div class="text-xs text-gray-500 font-medium">Previous</div>
+                        <div class="font-semibold line-clamp-2">{{ previous_lesson.title }}</div>
+                    </div>
+                </a>
+                {% else %}
+                <div class="flex-1"></div>
+                {% endif %}
+
+                {% if next_lesson %}
+                <a href="{{ next_lesson.get_absolute_url }}" class="flex-1 flex items-center justify-end gap-3 px-5 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition">
+                    <div class="text-right">
+                        <div class="text-xs text-indigo-200 font-medium">Next</div>
+                        <div class="font-semibold line-clamp-2">{{ next_lesson.title }}</div>
+                    </div>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+                {% else %}
+                <div class="flex-1"></div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-6 text-center">
+                <div class="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-xl font-bold text-gray-900">Unlock this lesson</h2>
+                    <p class="text-gray-600">Enroll in {{ post.course.title }} to access all lessons and updates.</p>
+                </div>
+                <div class="space-y-3">
+                    {% if request.user.is_authenticated %}
+                    <a href="{% url 'courses:enroll_course' post.course.slug %}" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-700 transition">
+                        Enroll for ${{ post.course.price }}
+                    </a>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-700 transition">Login to enroll</a>
+                    <a href="{% url 'accounts:register' %}?next={{ request.path }}" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-gray-100 text-gray-800 font-semibold rounded-full hover:bg-gray-200 transition">Create an account</a>
+                    {% endif %}
+                </div>
+                <div class="text-sm text-gray-400">Lifetime access • New lessons added</div>
+            </div>
+            {% endif %}
+        </article>
+
+        <aside class="space-y-4">
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-xs text-gray-500">Course</p>
+                        <p class="font-semibold text-gray-900">{{ post.course.title }}</p>
+                    </div>
+                    <a href="{% url 'courses:course_detail' post.course.slug %}" class="text-indigo-600 text-sm font-semibold hover:text-indigo-700">View course</a>
+                </div>
+                <div class="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span>{{ course_lessons|length }} lessons</span>
+                    </div>
+                    {% if not post.course.is_free %}
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.657-1.567-3-3.5-3S5 9.343 5 11s1.567 3 3.5 3S12 12.657 12 11zm0 0V6a4 4 0 118 0v5" />
+                        </svg>
+                        <span>${{ post.course.price }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    {% for lesson in course_lessons %}
+                    {% if not is_enrolled and lesson.is_paid %}
+                    <div class="flex items-center gap-3 p-3 rounded-lg {% if lesson.id == post.id %}bg-indigo-50 border border-indigo-100{% else %}hover:bg-gray-50{% endif %}">
+                        <div class="flex-1 flex items-center gap-3 text-left cursor-not-allowed">
+                            <span class="text-xs text-gray-400">{{ forloop.counter }}.</span>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-gray-400">{{ lesson.title }}</p>
+                                <p class="text-xs text-gray-400">Locked</p>
+                            </div>
+                        </div>
+                        <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    {% else %}
+                    <div class="flex items-center gap-3 p-3 rounded-lg {% if lesson.id == post.id %}bg-indigo-50 border border-indigo-100{% else %}hover:bg-gray-50{% endif %}">
+                        <a href="{{ lesson.get_absolute_url }}" class="flex-1 flex items-center gap-3 text-left">
+                            <span class="text-xs text-gray-500">{{ forloop.counter }}.</span>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-gray-900">{{ lesson.title }}</p>
+                                <p class="text-xs text-gray-500">{{ lesson.reading_time }} min</p>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% empty %}
+                    <p class="text-sm text-gray-500">No lessons published yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

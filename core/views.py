@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from blog.models import Post, Course
+from blog.models import Post
+from courses.models import Course
 
 
 def home(request):

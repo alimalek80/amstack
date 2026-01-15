@@ -171,7 +171,7 @@
                     {% if has_access %}
                     <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded">ENROLLED</span>
                     {% else %}
-                    <span class="px-2.5 py-1 bg-amber-50 text-amber-600 text-xs font-medium rounded">PAID • ${% if post.course %}{{ post.course.price }}{% else %}29{% endif %}</span>
+                        <span class="px-2.5 py-1 bg-amber-50 text-amber-600 text-xs font-medium rounded">PAID</span>
                     {% endif %}
                 {% endif %}
             </div>
@@ -294,18 +294,17 @@
                             <p class="text-gray-600 text-sm mb-4">Get lifetime access to this tutorial and all future updates.</p>
                             
                             <div class="text-3xl font-bold text-gray-900 mb-6">
-                                ${% if post.course %}{{ post.course.price }}{% else %}29{% endif %}
+                                $29
                             </div>
                             
                             {% if request.user.is_authenticated %}
-                            <a href="{% if post.course %}{% url 'blog:enroll_course' post.course.slug %}{% else %}#{% endif %}" 
-                               class="block w-full py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
-                                Enroll Now
+                            <a href="#" class="block w-full py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
+                                Unlock now
                             </a>
                             {% else %}
                             <a href="{% url 'accounts:register' %}?next={{ request.path }}" 
                                class="block w-full py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition mb-3">
-                                Enroll Now
+                                Unlock now
                             </a>
                             <p class="text-xs text-gray-500">
                                 Already have an account? <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="text-indigo-600 hover:underline">Sign in</a>
@@ -328,40 +327,6 @@
                     </div>
                 </div>
                 
-                <!-- Course Navigation Buttons -->
-                {% if post.course %}
-                <div class="mt-12 pt-8 border-t border-gray-200">
-                    <div class="flex items-center justify-between gap-4">
-                        {% if previous_lesson %}
-                        <a href="{{ previous_lesson.get_absolute_url }}" class="flex-1 flex items-center gap-3 px-6 py-4 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition group">
-                            <svg class="w-5 h-5 group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                            <div class="text-left">
-                                <div class="text-xs text-indigo-500 font-medium">Previous Lesson</div>
-                                <div class="font-semibold line-clamp-2">{{ previous_lesson.title }}</div>
-                            </div>
-                        </a>
-                        {% else %}
-                        <div class="flex-1"></div>
-                        {% endif %}
-                        
-                        {% if next_lesson %}
-                        <a href="{{ next_lesson.get_absolute_url }}" class="flex-1 flex items-center justify-end gap-3 px-6 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition group">
-                            <div class="text-right">
-                                <div class="text-xs text-indigo-200 font-medium">Next Lesson</div>
-                                <div class="font-semibold line-clamp-2">{{ next_lesson.title }}</div>
-                            </div>
-                            <svg class="w-5 h-5 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
-                        {% else %}
-                        <div class="flex-1"></div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
                 {% endif %}
             </article>
         </div>

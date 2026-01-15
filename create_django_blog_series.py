@@ -3,10 +3,14 @@
 Create a complete Django Blog App tutorial series
 """
 import os
+import sys
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'amstack.settings')
 django.setup()
+
+# Courses moved to the dedicated courses app. Update this script before running.
+sys.exit("create_django_blog_series.py is outdated. Update it to use courses.models.Course/Lesson instead of blog.Course/Post.course.")
 
 from blog.models import Post, Category, Tag, Course
 from django.utils import timezone

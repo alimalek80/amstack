@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Tag, Post, Course, SavedPost, CourseEnrollment
+from .models import Category, Tag, Post, SavedPost
 
 
 @admin.register(Category)
@@ -23,26 +23,10 @@ class TagAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-class PostInline(admin.TabularInline):
-    model = Post
-    extra = 0
-    fields = ('title', 'order', 'is_published', 'is_free')
-    ordering = ('order',)
-
-
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'is_published', 'is_free', 'price', 'total_lessons', 'created_at')
-    list_filter = ('is_published', 'is_free')
-    prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'description')
-    inlines = [PostInline]
-
-
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ('title', 'post_type', 'category', 'is_published', 'is_featured', 'is_free', 'published_at', 'reading_time')
-    list_filter = ('is_published', 'is_featured', 'is_free', 'post_type', 'category', 'tags', 'course')
+    list_filter = ('is_published', 'is_featured', 'is_free', 'post_type', 'category', 'tags')
     list_editable = ('is_published', 'is_featured', 'is_free')
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'excerpt', 'content')
@@ -61,7 +45,7 @@ class PostAdmin(admin.ModelAdmin):
             'fields': ('is_published', 'published_at', 'is_featured', 'is_free')
         }),
         ('Organization', {
-            'fields': ('post_type', 'category', 'course', 'order', 'tags', 'author')
+            'fields': ('post_type', 'category', 'tags', 'author')
         }),
     )
 
@@ -71,10 +55,3 @@ class SavedPostAdmin(admin.ModelAdmin):
     list_display = ('user', 'post', 'saved_at')
     list_filter = ('saved_at',)
     search_fields = ('user__email', 'post__title')
-
-
-@admin.register(CourseEnrollment)
-class CourseEnrollmentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'course', 'enrolled_at', 'progress')
-    list_filter = ('enrolled_at', 'course')
-    search_fields = ('user__email', 'course__title')

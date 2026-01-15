@@ -3,10 +3,13 @@
 Add advanced tutorials to the Django Blog series
 """
 import os
+import sys
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'amstack.settings')
 django.setup()
+
+sys.exit("create_advanced_tutorials.py is outdated. Update it to use courses.models.Course/Lesson instead of blog.Course/Post.course.")
 
 from blog.models import Post, Category, Tag, Course
 from django.utils import timezone

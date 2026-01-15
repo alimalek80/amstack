@@ -28,6 +28,7 @@ INSTALLED_APPS = [
 
     'accounts',
     'blog',
+    'courses',
     'core',
     'leads',
     'services',

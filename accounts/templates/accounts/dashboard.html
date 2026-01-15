@@ -119,7 +119,7 @@
                         </div>
                         {% empty %}
                         <div class="bg-white rounded-xl border border-gray-200 p-5 col-span-2 text-center text-gray-500">
-                            No courses in progress. <a href="#" class="text-indigo-600">Browse courses</a>
+                            No courses in progress. <a href="{% url 'courses:course_list' %}" class="text-indigo-600">Browse courses</a>
                         </div>
                         {% endfor %}
                     </div>

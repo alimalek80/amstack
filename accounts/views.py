@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
 from .forms import UserRegistrationForm, UserLoginForm, ProfileUpdateForm
+from courses.models import CourseEnrollment
 
 
 class RegisterView(CreateView):
@@ -108,7 +109,8 @@ def saved_tutorials_view(request):
 @login_required
 def my_courses_view(request):
     """View enrolled courses."""
-    return render(request, 'accounts/my_courses.html')
+    enrollments = CourseEnrollment.objects.filter(user=request.user).select_related('course').order_by('-enrolled_at')
+    return render(request, 'accounts/my_courses.html', {'enrollments': enrollments})
 
 
 @login_required

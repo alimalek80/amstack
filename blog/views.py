@@ -5,13 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
-from .models import Post, Tag, Category, Course, SavedPost, CourseEnrollment
+from .models import Post, Tag, Category, SavedPost
 
 
 def post_list(request):
     """List all published blog posts with search and filtering."""
-    # Exclude posts that are part of a course (show only standalone blog posts)
-    posts = Post.objects.filter(is_published=True, course__isnull=True)
+    posts = Post.objects.filter(is_published=True)
     
     # Search functionality
     query = request.GET.get('q', '')
@@ -91,47 +90,18 @@ def post_detail(request, slug):
     if request.user.is_authenticated:
         # Check if post is saved
         is_saved = SavedPost.objects.filter(user=request.user, post=post).exists()
-        
-        # Check course enrollment for paid posts
-        if not post.is_free and post.course:
-            has_access = CourseEnrollment.objects.filter(
-                user=request.user,
-                course=post.course
-            ).exists()
-    
+
     # Related posts (same tags, excluding current)
     related_posts = Post.objects.filter(
         is_published=True,
         tags__in=post.tags.all()
     ).exclude(id=post.id).distinct()[:3]
-    
-    # Course lessons if part of a course
-    course_lessons = []
-    previous_lesson = None
-    next_lesson = None
-    
-    if post.course:
-        course_lessons = post.course.posts.filter(is_published=True).order_by('order')
-        
-        # Get previous and next lesson
-        lesson_list = list(course_lessons)
-        try:
-            current_index = lesson_list.index(post)
-            if current_index > 0:
-                previous_lesson = lesson_list[current_index - 1]
-            if current_index < len(lesson_list) - 1:
-                next_lesson = lesson_list[current_index + 1]
-        except ValueError:
-            pass
-    
+
     context = {
         'post': post,
         'has_access': has_access,
         'is_saved': is_saved,
         'related_posts': related_posts,
-        'course_lessons': course_lessons,
-        'previous_lesson': previous_lesson,
-        'next_lesson': next_lesson,
     }
     return render(request, 'blog/post_detail.html', context)
 
@@ -160,44 +130,6 @@ def tag_posts(request, slug):
     }
     return render(request, 'blog/tag_posts.html', context)
 
-
-def course_list(request):
-    """List all published courses."""
-    courses = Course.objects.filter(is_published=True)
-    
-    # Get user's enrolled courses if authenticated
-    enrolled_course_ids = []
-    if request.user.is_authenticated:
-        enrolled_course_ids = list(
-            CourseEnrollment.objects.filter(user=request.user).values_list('course_id', flat=True)
-        )
-    
-    context = {
-        'courses': courses,
-        'enrolled_course_ids': enrolled_course_ids,
-    }
-    return render(request, 'blog/course_list.html', context)
-
-
-def course_detail(request, slug):
-    """Display course details and lessons."""
-    course = get_object_or_404(Course, slug=slug, is_published=True)
-    lessons = course.posts.filter(is_published=True).order_by('order')
-    
-    # Check enrollment
-    is_enrolled = False
-    if request.user.is_authenticated:
-        is_enrolled = CourseEnrollment.objects.filter(
-            user=request.user,
-            course=course
-        ).exists()
-    
-    context = {
-        'course': course,
-        'lessons': lessons,
-        'is_enrolled': is_enrolled,
-    }
-    return render(request, 'blog/course_detail.html', context)
 
 
 @login_required
@@ -229,25 +161,4 @@ def toggle_save_post(request, post_id):
     
     return redirect(post.get_absolute_url())
 
-
-@login_required
-@require_POST
-def enroll_course(request, slug):
-    """Enroll user in a course."""
-    course = get_object_or_404(Course, slug=slug, is_published=True)
-    
-    # Create enrollment if not already enrolled
-    enrollment, created = CourseEnrollment.objects.get_or_create(
-        user=request.user,
-        course=course
-    )
-    
-    if created:
-        # Update profile stats
-        request.user.profile.enrolled_courses_count = CourseEnrollment.objects.filter(
-            user=request.user
-        ).count()
-        request.user.profile.save()
-    
-    return redirect(course.get_absolute_url())
 

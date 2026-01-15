@@ -91,49 +91,12 @@ class Tag(models.Model):
         return reverse('blog:tag_posts', kwargs={'slug': self.slug})
 
 
-class Course(models.Model):
-    """Course model for grouping related tutorials into a series."""
-    
-    title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255, unique=True, blank=True)
-    description = models.TextField(blank=True)
-    cover_image = models.ImageField(upload_to='courses/', blank=True, null=True)
-    is_published = models.BooleanField(default=False)
-    is_free = models.BooleanField(default=False)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return self.title
-    
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)
-        super().save(*args, **kwargs)
-    
-    def get_absolute_url(self):
-        return reverse('blog:course_detail', kwargs={'slug': self.slug})
-    
-    @property
-    def total_lessons(self):
-        return self.posts.count()
-    
-    @property
-    def published_lessons(self):
-        return self.posts.filter(is_published=True).count()
-
-
 class Post(models.Model):
     """Blog post model with Markdown support."""
     
     POST_TYPE_CHOICES = [
         ('tutorial', 'Tutorial'),
         ('article', 'Article'),
-        ('lesson', 'Course Lesson'),
     ]
     
     # Basic fields
@@ -155,8 +118,6 @@ class Post(models.Model):
     
     # Type and organization
     post_type = models.CharField(max_length=20, choices=POST_TYPE_CHOICES, default='tutorial')
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
-    order = models.PositiveIntegerField(default=0, help_text='Order within a course')
     category = models.ForeignKey(
         Category, 
         on_delete=models.SET_NULL, 
@@ -273,28 +234,4 @@ class SavedPost(models.Model):
     
     def __str__(self):
         return f"{self.user.email} saved {self.post.title}"
-
-
-class CourseEnrollment(models.Model):
-    """Track user enrollment in courses (for paid courses)."""
-    
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='course_enrollments'
-    )
-    course = models.ForeignKey(
-        Course,
-        on_delete=models.CASCADE,
-        related_name='enrollments'
-    )
-    enrolled_at = models.DateTimeField(auto_now_add=True)
-    progress = models.PositiveIntegerField(default=0)  # Percentage
-    
-    class Meta:
-        unique_together = ('user', 'course')
-        ordering = ['-enrolled_at']
-    
-    def __str__(self):
-        return f"{self.user.email} enrolled in {self.course.title}"
 
