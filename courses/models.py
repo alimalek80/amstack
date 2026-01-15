@@ -134,6 +134,13 @@ class CourseEnrollment(models.Model):
     )
     enrolled_at = models.DateTimeField(auto_now_add=True)
     progress = models.PositiveIntegerField(default=0)
+    last_lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='enrollment_last_seen'
+    )
 
     class Meta:
         unique_together = ('user', 'course')
@@ -141,3 +148,15 @@ class CourseEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.user.email} enrolled in {self.course.title}"
+
+    def get_continue_lesson(self):
+        """Return the lesson the user should resume from."""
+        lessons = list(self.course.lessons.filter(is_published=True).order_by('order', 'created_at'))
+        if not lessons:
+            return None
+
+        # If we have a last seen lesson, try to return it; otherwise start at the first lesson
+        if self.last_lesson and self.last_lesson in lessons:
+            return self.last_lesson
+
+        return lessons[0]

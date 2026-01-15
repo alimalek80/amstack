@@ -109,7 +109,12 @@ def saved_tutorials_view(request):
 @login_required
 def my_courses_view(request):
     """View enrolled courses."""
-    enrollments = CourseEnrollment.objects.filter(user=request.user).select_related('course').order_by('-enrolled_at')
+    enrollments = (
+        CourseEnrollment.objects
+        .filter(user=request.user)
+        .select_related('course', 'last_lesson')
+        .order_by('-enrolled_at')
+    )
     return render(request, 'accounts/my_courses.html', {'enrollments': enrollments})
 
 

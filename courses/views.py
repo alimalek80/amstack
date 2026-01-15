@@ -6,17 +6,36 @@ from .models import Course, Lesson, CourseEnrollment
 
 
 def course_list(request):
-    courses = Course.objects.filter(is_published=True)
+    courses = list(Course.objects.filter(is_published=True))
 
-    enrolled_course_ids = []
+    enrollment_map = {}
+    continue_links = {}
     if request.user.is_authenticated:
-        enrolled_course_ids = list(
-            CourseEnrollment.objects.filter(user=request.user).values_list('course_id', flat=True)
+        enrollments = (
+            CourseEnrollment.objects
+            .filter(user=request.user, course__in=courses)
+            .select_related('course', 'last_lesson')
         )
+        for enrollment in enrollments:
+            enrollment_map[enrollment.course_id] = enrollment
+            lesson = enrollment.get_continue_lesson()
+            if lesson:
+                continue_links[enrollment.course_id] = lesson.get_absolute_url()
+            else:
+                continue_links[enrollment.course_id] = enrollment.course.get_absolute_url()
+
+    course_cards = []
+    for course in courses:
+        is_enrolled = course.id in enrollment_map
+        continue_url = continue_links.get(course.id, course.get_absolute_url())
+        course_cards.append({
+            'course': course,
+            'is_enrolled': is_enrolled,
+            'continue_url': continue_url,
+        })
 
     context = {
-        'courses': courses,
-        'enrolled_course_ids': enrolled_course_ids,
+        'course_cards': course_cards,
     }
     return render(request, 'courses/course_list.html', context)
 
@@ -65,6 +84,25 @@ def lesson_detail(request, course_slug, slug):
             next_lesson = lesson_list[current_index + 1]
     except ValueError:
         pass
+
+    # Persist resume progress for enrolled users
+    if request.user.is_authenticated and is_enrolled:
+        enrollment = CourseEnrollment.objects.filter(user=request.user, course=course).select_related('last_lesson').first()
+        if enrollment:
+            update_fields = []
+            if enrollment.last_lesson_id != lesson.id:
+                enrollment.last_lesson = lesson
+                update_fields.append('last_lesson')
+
+            total_lessons = len(lesson_list)
+            if total_lessons:
+                progress_pct = int(((current_index + 1) / total_lessons) * 100)
+                if enrollment.progress != progress_pct:
+                    enrollment.progress = progress_pct
+                    update_fields.append('progress')
+
+            if update_fields:
+                enrollment.save(update_fields=update_fields)
 
     context = {
         'post': lesson,  # keep template variable name aligned with existing lesson template

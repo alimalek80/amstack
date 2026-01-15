@@ -20,7 +20,9 @@
 				<p class="font-semibold text-gray-900">{{ enrollment.course.title }}</p>
 				<p class="text-sm text-gray-500">Enrolled {{ enrollment.enrolled_at|date:"Y-m-d" }}</p>
 			</div>
-			<a href="{{ enrollment.course.get_absolute_url }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-full hover:bg-indigo-700 transition">Continue</a>
+			{% with lesson=enrollment.get_continue_lesson %}
+			<a href="{% if lesson %}{{ lesson.get_absolute_url }}{% else %}{{ enrollment.course.get_absolute_url }}{% endif %}" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-full hover:bg-indigo-700 transition">Continue</a>
+			{% endwith %}
 		</div>
 		{% endfor %}
 	</div>
