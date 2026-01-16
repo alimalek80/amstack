@@ -8,6 +8,7 @@ from django.views.generic import CreateView
 
 from .forms import UserRegistrationForm, UserLoginForm, ProfileUpdateForm
 from courses.models import CourseEnrollment
+from orders.models import Order
 
 
 class RegisterView(CreateView):
@@ -59,18 +60,31 @@ def dashboard_view(request):
     user = request.user
     profile = user.profile
     
-    # Demo data for recent orders (will be replaced with real data later)
-    recent_orders = [
-        {'id': 'ORD-2024-002', 'item': 'Production-Grade Django + Tailwind SaaS', 'status': 'Paid'},
-        {'id': 'ORD-2024-004', 'item': 'Celery Task Queues Bundle', 'status': 'Paid'},
-        {'id': 'ORD-2024-006', 'item': 'PostgreSQL Optimization', 'status': 'Paid'},
-    ]
+    # Get real recent orders from database
+    recent_orders = Order.objects.filter(
+        user=user, 
+        status=Order.STATUS_PAID
+    ).select_related('post', 'course', 'service').order_by('-paid_at')[:3]
     
-    # Demo data for courses in progress
-    courses_progress = [
-        {'title': 'Production-Grade Django + Tailwind SaaS Architecture', 'progress': 60},
-        {'title': 'PostgreSQL Optimization for Django Apps', 'progress': 25},
-    ]
+    # Get real courses in progress
+    enrollments = CourseEnrollment.objects.filter(
+        user=user
+    ).select_related('course', 'last_lesson').order_by('-enrolled_at')[:2]
+    
+    courses_progress = []
+    for enrollment in enrollments:
+        # Calculate progress based on lessons in course
+        total_lessons = enrollment.course.lessons.filter(is_published=True).count()
+        if total_lessons > 0:
+            progress = min(100, enrollment.progress)
+        else:
+            progress = 0
+            
+        courses_progress.append({
+            'title': enrollment.course.title,
+            'progress': progress,
+            'enrollment': enrollment,
+        })
     
     context = {
         'user': user,
@@ -121,7 +135,24 @@ def my_courses_view(request):
 @login_required
 def my_orders_view(request):
     """View order history."""
-    return render(request, 'accounts/my_orders.html')
+    from django.core.paginator import Paginator
+    
+    # Only show paid and failed orders (exclude pending to reduce clutter)
+    orders = Order.objects.filter(
+        user=request.user,
+        status__in=[Order.STATUS_PAID, Order.STATUS_FAILED, Order.STATUS_REFUNDED]
+    ).select_related('post', 'course', 'service').order_by('-created_at')
+    
+    # Pagination
+    paginator = Paginator(orders, 20)
+    page = request.GET.get('page', 1)
+    orders_page = paginator.get_page(page)
+    
+    context = {
+        'orders': orders_page,
+        'total_orders': paginator.count,
+    }
+    return render(request, 'accounts/my_orders.html', context)
 
 
 @login_required
@@ -130,18 +161,38 @@ def profile_settings_view(request):
     if request.method == 'POST':
         form = ProfileUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
-            form.save()
+            # Save user fields
+            user = form.save()
+            
             # Update profile fields
-            profile = request.user.profile
-            profile.bio = request.POST.get('bio', '')
-            profile.newsletter_subscribed = request.POST.get('newsletter_subscribed', False) == 'on'
+            profile = user.profile
+            bio = request.POST.get('bio', '').strip()
+            if len(bio) <= 500:  # Validate bio length
+                profile.bio = bio
+            else:
+                messages.error(request, 'Bio must be 500 characters or less.')
+                return render(request, 'accounts/profile_settings.html', {
+                    'form': form,
+                    'user': request.user,
+                    'profile': request.user.profile
+                })
+            
+            profile.newsletter_subscribed = request.POST.get('newsletter_subscribed') == 'on'
             profile.save()
+            
             messages.success(request, 'Profile updated successfully!')
             return redirect('accounts:profile_settings')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = ProfileUpdateForm(instance=request.user)
     
-    return render(request, 'accounts/profile_settings.html', {'form': form})
+    context = {
+        'form': form,
+        'user': request.user,
+        'profile': request.user.profile
+    }
+    return render(request, 'accounts/profile_settings.html', context)
 
 
 @login_required

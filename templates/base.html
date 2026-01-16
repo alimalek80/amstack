@@ -20,6 +20,9 @@
     
     {% include 'footer.html' %}
     
+    <!-- CSRF Token for AJAX requests -->
+    {% csrf_token %}
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

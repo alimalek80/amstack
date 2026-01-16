@@ -169,7 +169,7 @@
                 <span class="px-2.5 py-1 bg-green-50 text-green-600 text-xs font-medium rounded">FREE</span>
                 {% else %}
                     {% if has_access %}
-                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded">ENROLLED</span>
+                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-medium rounded">UNLOCKED</span>
                     {% else %}
                         <span class="px-2.5 py-1 bg-amber-50 text-amber-600 text-xs font-medium rounded">PAID</span>
                     {% endif %}
@@ -291,16 +291,35 @@
                             </div>
                             
                             <h3 class="text-xl font-bold text-gray-900 mb-2">Unlock Full Tutorial</h3>
-                            <p class="text-gray-600 text-sm mb-4">Get lifetime access to this tutorial and all future updates.</p>
+                            <p class="text-gray-600 text-sm mb-4">Get instant lifetime access to this tutorial and all future updates.</p>
                             
-                            <div class="text-3xl font-bold text-gray-900 mb-6">
-                                $29
+                            <div class="flex items-center gap-2 mb-4">
+                                <div class="text-3xl font-bold text-gray-900">
+                                    ${{ post.price }}
+                                </div>
+                                <div class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                                    One-time purchase
+                                </div>
                             </div>
-                            
+
                             {% if request.user.is_authenticated %}
-                            <a href="#" class="block w-full py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition">
-                                Unlock now
-                            </a>
+                            <div class="space-y-3">
+                                <button type="button" 
+                                        onclick="buyNowDigitalProduct('post', {{ post.id }}, '{{ post.title|escapejs }}')"
+                                        class="block w-full py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition text-center">
+                                    Buy Now - ${{ post.price }}
+                                </button>
+                                <div class="flex items-center justify-center space-x-2 text-xs text-gray-500">
+                                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Instant access</span>
+                                    <span>•</span>
+                                    <span>No subscription</span>
+                                    <span>•</span>
+                                    <span>30-day refund</span>
+                                </div>
+                            </div>
                             {% else %}
                             <a href="{% url 'accounts:register' %}?next={{ request.path }}" 
                                class="block w-full py-3 bg-indigo-600 text-white font-medium rounded-full hover:bg-indigo-700 transition mb-3">
@@ -514,5 +533,100 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Cart functions
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    function addToCart(productType, productId, productName) {
+        fetch('{% url "orders:add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                product_type: productType,
+                product_id: productId,
+                quantity: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${productName} added to cart!`);
+                // Update cart count in navbar if exists
+                updateCartCount(data.basket_count);
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding to cart');
+        });
+    }
+
+    // Optimized function for digital products - goes straight to checkout
+    function buyNowDigitalProduct(productType, productId, productName) {
+        // Show loading state
+        const button = event.target;
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+        `;
+
+        fetch('{% url "orders:add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                product_type: productType,
+                product_id: productId,
+                quantity: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect directly to checkout for digital products
+                window.location.href = '{% url "orders:checkout" %}';
+            } else {
+                button.disabled = false;
+                button.textContent = originalText;
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            button.disabled = false;
+            button.textContent = originalText;
+            console.error('Error:', error);
+            alert('An error occurred while processing your purchase');
+        });
+    }
+
+    function updateCartCount(count) {
+        const cartBadge = document.querySelector('.absolute.-top-1.-right-1');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            if (count > 0) {
+                cartBadge.style.display = 'flex';
+            } else {
+                cartBadge.style.display = 'none';
+            }
+        }
+    }
 </script>
+
+<!-- Add CSRF token for JavaScript -->
+{% csrf_token %}
+
 {% endblock %}

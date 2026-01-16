@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 from .models import Post, Tag, Category, SavedPost
+from orders.utils import user_has_post_access
 
 
 def post_list(request):
@@ -84,7 +85,7 @@ def post_detail(request, slug):
     post = get_object_or_404(Post, slug=slug, is_published=True)
     
     # Check if user has access to paid content
-    has_access = post.is_free
+    has_access = user_has_post_access(request.user, post)
     is_saved = False
     
     if request.user.is_authenticated:

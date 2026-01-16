@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - Order {{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Progress Indicator -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">✓</div>
+                        <span class="ml-2 text-sm font-medium text-green-600">Cart</span>
+                    </div>
+                    <div class="w-8 h-0.5 bg-green-500"></div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">✓</div>
+                        <span class="ml-2 text-sm font-medium text-green-600">Checkout</span>
+                    </div>
+                    <div class="w-8 h-0.5 bg-blue-600"></div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                        <span class="ml-2 text-sm font-medium text-blue-600">Payment</span>
+                    </div>
+                    <div class="w-8 h-0.5 bg-gray-300"></div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                        <span class="ml-2 text-sm font-medium text-gray-500">Complete</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold text-center mb-8">Complete Your Payment</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Payment Form -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-6">Payment Method</h2>
+                
+                <form method="post" id="payment-form">
+                    {% csrf_token %}
+                    
+                    <!-- Payment Method Selection -->
+                    <div class="mb-6">
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="payment_method" value="demo" checked class="mr-3">
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Demo Payment (Development)</div>
+                                    <div class="text-sm text-gray-500">Simulate payment for testing purposes</div>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 opacity-50">
+                                <input type="radio" name="payment_method" value="stripe" disabled class="mr-3">
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Credit Card (Coming Soon)</div>
+                                    <div class="text-sm text-gray-500">Pay securely with your credit card</div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <img src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4.svg" alt="Visa" class="h-6">
+                                    <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130.svg" alt="Mastercard" class="h-6">
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 opacity-50">
+                                <input type="radio" name="payment_method" value="paypal" disabled class="mr-3">
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">PayPal (Coming Soon)</div>
+                                    <div class="text-sm text-gray-500">Pay with your PayPal account</div>
+                                </div>
+                                <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_74x46.jpg" alt="PayPal" class="h-6">
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Demo Payment Info -->
+                    <div id="demo-payment-info" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-yellow-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="text-sm font-medium text-yellow-800">Demo Payment Mode</h4>
+                                <p class="text-xs text-yellow-700 mt-1">This is a development environment. No real payment will be processed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Billing Summary -->
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <h3 class="font-medium text-gray-900 mb-2">Billing to:</h3>
+                        <p class="text-sm text-gray-700">{{ order.billing_name }}</p>
+                        <p class="text-sm text-gray-700">{{ order.billing_email }}</p>
+                        {% if order.billing_address %}
+                        <p class="text-sm text-gray-700 mt-1">{{ order.billing_address|linebreaks }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Terms Checkbox -->
+                    <div class="mb-6">
+                        <label class="flex items-start">
+                            <input type="checkbox" required class="mt-1 mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm text-gray-600">
+                                By proceeding with this payment, I agree to the 
+                                <a href="#" class="text-blue-600 hover:underline">Terms of Service</a> and confirm that all billing information is accurate.
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- Payment Buttons -->
+                    <div class="flex space-x-4">
+                        <a href="{% url 'orders:checkout' %}" 
+                           class="flex-1 bg-gray-100 text-gray-900 py-3 px-4 rounded-md font-medium text-center hover:bg-gray-200 transition-colors">
+                            Back to Checkout
+                        </a>
+                        <button type="submit" 
+                                id="pay-button"
+                                class="flex-1 bg-green-600 text-white py-3 px-4 rounded-md font-medium hover:bg-green-700 transition-colors">
+                            Complete Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-6">Order Summary</h2>
+                
+                <div class="mb-4">
+                    <div class="text-sm text-gray-600">Order Number</div>
+                    <div class="font-mono text-lg font-semibold text-gray-900">{{ order.order_number }}</div>
+                </div>
+                
+                <!-- Items List -->
+                <div class="space-y-3 mb-6">
+                    {% for item in order.items.all %}
+                    <div class="flex justify-between items-start py-2 border-b border-gray-100">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-medium text-gray-900">{{ item.product_name }}</h4>
+                            <p class="text-xs text-gray-500 mt-1">{{ item.product_type|title }}</p>
+                            <div class="flex items-center mt-1">
+                                <span class="text-xs text-gray-500">Qty: {{ item.quantity }}</span>
+                                <span class="text-xs text-gray-400 mx-2">×</span>
+                                <span class="text-xs text-gray-500">${{ item.unit_price }}</span>
+                            </div>
+                        </div>
+                        <div class="text-sm font-medium text-gray-900">
+                            ${{ item.total_price }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Totals -->
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="text-gray-900">${{ order.subtotal }}</span>
+                    </div>
+                    
+                    {% if order.tax_amount and order.tax_amount > 0 %}
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Tax</span>
+                        <span class="text-gray-900">${{ order.tax_amount }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if order.discount_amount and order.discount_amount > 0 %}
+                    <div class="flex justify-between text-sm text-green-600">
+                        <span>Discount</span>
+                        <span>-${{ order.discount_amount }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="border-t pt-2 mt-4">
+                        <div class="flex justify-between text-lg font-semibold">
+                            <span class="text-gray-900">Total</span>
+                            <span class="text-gray-900">${{ order.total_amount }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security & Guarantees -->
+                <div class="mt-6 space-y-3">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        SSL Encrypted Payment
+                    </div>
+                    
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        30-Day Money Back Guarantee
+                    </div>
+                    
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        Instant Access After Payment
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const payButton = document.getElementById('pay-button');
+    const form = document.getElementById('payment-form');
+    
+    form.addEventListener('submit', function(e) {
+        // Show processing state
+        payButton.disabled = true;
+        payButton.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing Payment...
+        `;
+        
+        // In a real app, you'd handle the payment processing here
+        // For demo, we just submit the form normally
+    });
+});
+</script>
+{% endblock %}

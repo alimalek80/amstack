@@ -1,13 +1,10 @@
-"""
-Models for comprehensive e-commerce order management.
-"""
-import uuid
-from decimal import Decimal
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.db.models import Q
+from decimal import Decimal
+import uuid
 
 
 class Order(models.Model):
@@ -47,7 +44,7 @@ class Order(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     
     # Payment details
     payment_method = models.CharField(max_length=50, blank=True)
@@ -94,7 +91,7 @@ class Order(models.Model):
         ]
 
     def __str__(self):
-        return f"Order {self.order_number or self.id} - {self.billing_name or self.user.email}"
+        return f"Order {self.order_number or self.id} - {self.billing_name}"
 
     def save(self, *args, **kwargs):
         if not self.order_number:
@@ -186,24 +183,6 @@ class Order(models.Model):
             return 'course'
         if self.service_id:
             return 'service'
-        return None
-    
-    def get_display_amount(self):
-        """Get the display amount for templates."""
-        if self.total_amount:
-            return self.total_amount
-        elif self.amount:  # Legacy field
-            return self.amount
-        elif self.payment_amount:
-            return self.payment_amount
-        else:
-            return self.subtotal or Decimal('0.00')
-    
-    @property
-    def display_amount(self):
-        """Property for template access to display amount."""
-        return self.get_display_amount()
-
 
 class OrderItem(models.Model):
     """Individual items within an order with price snapshots."""
@@ -440,4 +419,101 @@ class BasketItem(models.Model):
     
     def get_total_price(self):
         """Get the total price (unit price × quantity)."""
+        return self.get_unit_price() * self.quantity
+    """Items in a user's shopping basket."""
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='basket_items'
+    )
+    
+    # Product relations (only one should be set per item)
+    post = models.ForeignKey(
+        'blog.Post',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='basket_items'
+    )
+    course = models.ForeignKey(
+        'courses.Course',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='basket_items'
+    )
+    service = models.ForeignKey(
+        'services.Service',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='basket_items'
+    )
+    
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-added_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'post'],
+                condition=Q(post__isnull=False),
+                name='unique_post_basket_item_per_user',
+            ),
+            models.UniqueConstraint(
+                fields=['user', 'course'],
+                condition=Q(course__isnull=False),
+                name='unique_course_basket_item_per_user',
+            ),
+            models.UniqueConstraint(
+                fields=['user', 'service'],
+                condition=Q(service__isnull=False),
+                name='unique_service_basket_item_per_user',
+            ),
+        ]
+    
+    def __str__(self):
+        product = self.get_product()
+        return f"{self.user.email}'s basket: {product} (x{self.quantity})"
+    
+    def clean(self):
+        targets = [self.post, self.course, self.service]
+        if sum(1 for target in targets if target) != 1:
+            raise ValidationError('Exactly one target (post, course, or service) must be set for a basket item.')
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+    
+    def get_product(self):
+        if self.post:
+            return self.post
+        if self.course:
+            return self.course
+        if self.service:
+            return self.service
+        return None
+    
+    def get_product_type(self):
+        if self.post:
+            return Order.PRODUCT_POST
+        if self.course:
+            return Order.PRODUCT_COURSE
+        if self.service:
+            return Order.PRODUCT_SERVICE
+        return None
+    
+    def get_unit_price(self):
+        if self.post:
+            return Decimal(self.post.price or 0)
+        if self.course:
+            return Decimal(self.course.price or 0)
+        if self.service:
+            return Decimal(self.service.fixed_price or self.service.starting_price or 0)
+        return Decimal('0.00')
+    
+    def get_total_price(self):
         return self.get_unit_price() * self.quantity

@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoice {{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Invoice Header -->
+        <div class="bg-white rounded-lg shadow-md p-8 mb-8" id="invoice-content">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Invoice</h1>
+                    <div class="text-sm text-gray-600">
+                        <p><strong>Invoice Number:</strong> <span class="font-mono">{{ invoice.invoice_number }}</span></p>
+                        <p><strong>Issue Date:</strong> {{ invoice.issue_date|date:"F d, Y" }}</p>
+                        <p><strong>Order Number:</strong> <span class="font-mono">{{ order.order_number }}</span></p>
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-gray-900 mb-2">AMStack</div>
+                    <div class="text-sm text-gray-600">
+                        <p>Your Learning Platform</p>
+                        <p>support@amstack.com</p>
+                        <p>www.amstack.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Bill To -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-3">Bill To:</h3>
+                    <div class="text-sm text-gray-700">
+                        <p class="font-medium">{{ order.billing_name }}</p>
+                        <p>{{ order.billing_email }}</p>
+                        {% if order.billing_address %}
+                        <div class="mt-2">{{ order.billing_address|linebreaks }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Invoice Info -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-3">Payment Information:</h3>
+                    <div class="text-sm text-gray-700">
+                        <p><strong>Payment Method:</strong> {{ order.payment_method|capfirst }}</p>
+                        <p><strong>Transaction ID:</strong> <span class="font-mono">{{ order.payment_transaction_id }}</span></p>
+                        <p><strong>Payment Date:</strong> {{ order.paid_at|date:"F d, Y" }}</p>
+                        <p><strong>Status:</strong> <span class="text-green-600 font-medium">Paid</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Items -->
+            <div class="mb-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Items</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="border-b-2 border-gray-300">
+                                <th class="text-left py-3 font-medium text-gray-900">Description</th>
+                                <th class="text-left py-3 font-medium text-gray-900">Type</th>
+                                <th class="text-right py-3 font-medium text-gray-900">Qty</th>
+                                <th class="text-right py-3 font-medium text-gray-900">Unit Price</th>
+                                <th class="text-right py-3 font-medium text-gray-900">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr class="border-b border-gray-200">
+                                <td class="py-3">
+                                    <div class="font-medium text-gray-900">{{ item.product_name }}</div>
+                                    {% if item.get_product.description %}
+                                    <div class="text-sm text-gray-500 mt-1">{{ item.get_product.description|truncatewords:10 }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 text-gray-700">{{ item.product_type|capfirst }}</td>
+                                <td class="py-3 text-right text-gray-700">{{ item.quantity }}</td>
+                                <td class="py-3 text-right text-gray-700">${{ item.unit_price }}</td>
+                                <td class="py-3 text-right font-medium text-gray-900">${{ item.total_price }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Invoice Totals -->
+            <div class="flex justify-end">
+                <div class="w-64">
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span class="text-gray-900">${{ invoice.subtotal }}</span>
+                        </div>
+                        
+                        {% if invoice.tax_amount and invoice.tax_amount > 0 %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Tax:</span>
+                            <span class="text-gray-900">${{ invoice.tax_amount }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if invoice.discount_amount and invoice.discount_amount > 0 %}
+                        <div class="flex justify-between text-green-600">
+                            <span>Discount:</span>
+                            <span>-${{ invoice.discount_amount }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="border-t-2 border-gray-300 pt-2">
+                            <div class="flex justify-between text-xl font-bold">
+                                <span class="text-gray-900">Total:</span>
+                                <span class="text-gray-900">${{ invoice.amount }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-right text-sm text-green-600 font-medium mt-2">
+                            PAID
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900 mb-3">Notes:</h3>
+                <div class="text-sm text-gray-600 space-y-2">
+                    <p>• This invoice was generated automatically upon successful payment completion.</p>
+                    <p>• Access to purchased content is granted immediately after payment.</p>
+                    <p>• For support inquiries, please reference the order number {{ order.order_number }}.</p>
+                    <p>• Refund requests must be submitted within 30 days of purchase.</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-12 pt-8 border-t border-gray-200 text-center">
+                <div class="text-sm text-gray-500">
+                    <p>Thank you for your business!</p>
+                    <p class="mt-2">This is a computer-generated invoice and does not require a signature.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center print:hidden">
+            <button onclick="window.print()" 
+                    class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-md shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+                Print Invoice
+            </button>
+            
+            <a href="{% url 'orders:invoice' invoice_number=invoice.invoice_number %}?download=pdf" 
+               class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Download PDF
+            </a>
+            
+            <a href="{% url 'accounts:dashboard' %}" 
+               class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-md shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    @page {
+        margin: 1in;
+    }
+    .print\\:hidden {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+    }
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+    .shadow-md {
+        box-shadow: none !important;
+    }
+    .rounded-lg {
+        border-radius: 0 !important;
+    }
+}
+</style>
+{% endblock %}

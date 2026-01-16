@@ -25,7 +25,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'post_type', 'category', 'is_published', 'is_featured', 'is_free', 'published_at', 'reading_time')
+    list_display = ('title', 'post_type', 'category', 'is_published', 'is_featured', 'is_free', 'price', 'published_at', 'reading_time')
     list_filter = ('is_published', 'is_featured', 'is_free', 'post_type', 'category', 'tags')
     list_editable = ('is_published', 'is_featured', 'is_free')
     prepopulated_fields = {'slug': ('title',)}

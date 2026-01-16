@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from django.urls import reverse
 import markdown
 import bleach
 
@@ -101,6 +102,9 @@ class Service(models.Model):
         if self.requirements:
             return [item.strip() for item in self.requirements.strip().split('\n') if item.strip()]
         return []
+
+    def get_absolute_url(self):
+        return reverse('services:service_detail', kwargs={'slug': self.slug})
 
     @property
     def description_html(self):

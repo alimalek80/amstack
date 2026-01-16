@@ -1,3 +1,162 @@
 {% extends 'accounts/dashboard.html' %}
 
 {% block title %}My Orders - Amstack{% endblock %}
+
+{% block dashboard_main %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">My Orders</h1>
+    <p class="text-gray-600 mt-1">View all your purchase history and order status</p>
+</div>
+
+{% if orders %}
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order ID</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                    <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th class="text-center px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for order in orders %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm font-mono text-gray-900">{{ order.order_number|default:order.reference }}</td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900 font-medium">{{ order.get_product_label }}</div>
+                        {% if order.post %}
+                        <div class="text-xs text-gray-500">Blog Post</div>
+                        {% elif order.course %}
+                        <div class="text-xs text-gray-500">Course</div>
+                        {% elif order.service %}
+                        <div class="text-xs text-gray-500">Service</div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% comment %} Determine product type from legacy or new structure {% endcomment %}
+                        {% if order.product_type %}
+                            {% comment %} Legacy order structure {% endcomment %}
+                            {% if order.product_type == 'post' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Blog Post</span>
+                            {% elif order.product_type == 'course' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Course</span>
+                            {% elif order.product_type == 'service' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Service</span>
+                            {% endif %}
+                        {% elif order.items.exists %}
+                            {% comment %} New OrderItem structure {% endcomment %}
+                            {% with first_item=order.items.first %}
+                                {% if first_item.post %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Blog Post</span>
+                                {% elif first_item.course %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Course</span>
+                                {% elif first_item.service %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Service</span>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Unknown</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right text-sm font-semibold text-gray-900">
+                        {% if order.total_amount %}
+                            ${{ order.total_amount }}
+                        {% elif order.amount %}
+                            ${{ order.amount }}
+                        {% else %}
+                            $0.00
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if order.status == 'paid' %}bg-green-100 text-green-800{% elif order.status == 'pending' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right text-sm text-gray-500">
+                        {% if order.paid_at %}
+                            {{ order.paid_at|date:"M d, Y" }}
+                        {% else %}
+                            {{ order.created_at|date:"M d, Y" }}
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        {% if order.status == 'paid' %}
+                            {% comment %} Legacy order structure {% endcomment %}
+                            {% if order.post %}
+                                <a href="{{ order.post.get_absolute_url }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">View</a>
+                            {% elif order.course %}
+                                <a href="{{ order.course.get_absolute_url }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Open</a>
+                            {% elif order.service %}
+                                <a href="{{ order.service.get_absolute_url }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Details</a>
+                            {% comment %} New OrderItem structure {% endcomment %}
+                            {% elif order.items.exists %}
+                                {% with first_item=order.items.first %}
+                                    {% if first_item.post %}
+                                        <a href="{{ first_item.post.get_absolute_url }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">View</a>
+                                    {% elif first_item.course %}
+                                        <a href="{{ first_item.course.get_absolute_url }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Open</a>
+                                    {% elif first_item.service %}
+                                        <a href="{{ first_item.service.get_absolute_url }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Details</a>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400 text-sm">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if orders.has_other_pages %}
+<div class="mt-6 flex items-center justify-between">
+    <div class="text-sm text-gray-600">
+        Showing {{ orders.start_index }} to {{ orders.end_index }} of {{ total_orders }} orders
+    </div>
+    <div class="flex items-center space-x-2">
+        {% if orders.has_previous %}
+            <a href="?page={{ orders.previous_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</a>
+        {% endif %}
+        
+        <span class="px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md">
+            Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+        </span>
+        
+        {% if orders.has_next %}
+            <a href="?page={{ orders.next_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
+    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+    </svg>
+    <h2 class="text-xl font-semibold text-gray-900 mb-2">No orders yet</h2>
+    <p class="text-gray-600 mb-6">Start by purchasing some tutorials, courses, or services.</p>
+    
+    <div class="space-y-3">
+        <a href="{% url 'blog:post_list' %}" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
+            Browse Tutorials
+        </a>
+        <div class="text-center">
+            <a href="{% url 'courses:course_list' %}" class="text-indigo-600 hover:underline text-sm">View Courses</a>
+            <span class="text-gray-400 mx-2">•</span>
+            <a href="{% url 'services:service_list' %}" class="text-indigo-600 hover:underline text-sm">Our Services</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

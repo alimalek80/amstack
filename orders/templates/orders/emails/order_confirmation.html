@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - {{ order.order_number }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e5e5e5; padding-bottom: 20px;">
+        <h1 style="color: #2563eb; margin: 0;">{{ site_name }}</h1>
+        <p style="color: #666; margin: 5px 0;">Your Learning Platform</p>
+    </div>
+    
+    <!-- Success Message -->
+    <div style="background-color: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <h2 style="color: #065f46; margin: 0 0 10px 0;">🎉 Order Confirmed!</h2>
+        <p style="color: #047857; margin: 0;">Thank you for your purchase! Your order has been successfully processed and you now have access to your content.</p>
+    </div>
+    
+    <!-- Order Details -->
+    <div style="margin-bottom: 30px;">
+        <h3 style="color: #374151; margin-bottom: 15px;">Order Details</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <tr>
+                <td style="padding: 8px 0; color: #666; width: 40%;">Order Number:</td>
+                <td style="padding: 8px 0; font-weight: bold; font-family: monospace;">{{ order.order_number }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #666;">Order Date:</td>
+                <td style="padding: 8px 0;">{{ order.paid_at|date:"F d, Y" }} at {{ order.paid_at|time:"g:i A" }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #666;">Payment Method:</td>
+                <td style="padding: 8px 0;">{{ order.payment_method|capfirst }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; color: #666;">Amount Paid:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #059669;">${{ order.payment_amount }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Items Purchased -->
+    <div style="margin-bottom: 30px;">
+        <h3 style="color: #374151; margin-bottom: 15px;">Items Purchased</h3>
+        <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+            {% for item in order.items.all %}
+            <div style="{% if not forloop.last %}border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 15px;{% endif %}">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h4 style="margin: 0 0 5px 0; color: #111827;">{{ item.product_name }}</h4>
+                        <p style="margin: 0; color: #6b7280; font-size: 14px;">{{ item.product_type|capfirst }}</p>
+                        <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 12px;">Quantity: {{ item.quantity }} × ${{ item.unit_price }}</p>
+                    </div>
+                    <div style="font-weight: bold; color: #111827;">
+                        ${{ item.total_price }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Order Summary -->
+    <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <h3 style="color: #374151; margin-bottom: 15px;">Order Summary</h3>
+        <table style="width: 100%;">
+            <tr>
+                <td style="padding: 5px 0; color: #6b7280;">Subtotal:</td>
+                <td style="padding: 5px 0; text-align: right;">${{ order.subtotal }}</td>
+            </tr>
+            {% if order.tax_amount and order.tax_amount > 0 %}
+            <tr>
+                <td style="padding: 5px 0; color: #6b7280;">Tax:</td>
+                <td style="padding: 5px 0; text-align: right;">${{ order.tax_amount }}</td>
+            </tr>
+            {% endif %}
+            {% if order.discount_amount and order.discount_amount > 0 %}
+            <tr>
+                <td style="padding: 5px 0; color: #059669;">Discount:</td>
+                <td style="padding: 5px 0; text-align: right; color: #059669;">-${{ order.discount_amount }}</td>
+            </tr>
+            {% endif %}
+            <tr style="border-top: 2px solid #d1d5db;">
+                <td style="padding: 15px 0 5px 0; font-weight: bold; font-size: 18px; color: #111827;">Total:</td>
+                <td style="padding: 15px 0 5px 0; text-align: right; font-weight: bold; font-size: 18px; color: #111827;">${{ order.total_amount }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Access Information -->
+    <div style="background-color: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <h3 style="color: #1e40af; margin: 0 0 10px 0;">🚀 Access Your Content</h3>
+        <p style="color: #1e3a8a; margin: 0 0 15px 0;">You now have immediate access to all purchased content. Visit your dashboard to get started.</p>
+        <div style="text-align: center;">
+            <a href="{{ dashboard_url }}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Go to Dashboard</a>
+        </div>
+    </div>
+    
+    <!-- Invoice -->
+    {% if invoice_url %}
+    <div style="margin-bottom: 30px;">
+        <h3 style="color: #374151; margin-bottom: 15px;">📄 Invoice</h3>
+        <p style="color: #6b7280; margin-bottom: 15px;">Your invoice is ready for download:</p>
+        <div style="text-align: center;">
+            <a href="{{ invoice_url }}" style="display: inline-block; background-color: #f3f4f6; color: #374151; padding: 10px 20px; text-decoration: none; border-radius: 6px; border: 1px solid #d1d5db;">Download Invoice</a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Support -->
+    <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <h3 style="color: #374151; margin-bottom: 15px;">Need Help?</h3>
+        <p style="color: #6b7280; margin-bottom: 15px;">If you have any questions about your order or need assistance accessing your content, we're here to help:</p>
+        <ul style="color: #6b7280; margin: 0; padding-left: 20px;">
+            <li>Visit our Support Center</li>
+            <li>Reply to this email</li>
+            <li>Reference Order #{{ order.order_number }} in all communications</li>
+        </ul>
+    </div>
+    
+    <!-- Footer -->
+    <div style="text-align: center; border-top: 2px solid #e5e5e5; padding-top: 20px; color: #6b7280; font-size: 14px;">
+        <p style="margin-bottom: 10px;">Thank you for choosing {{ site_name }}!</p>
+        <p style="margin: 0;">This email was sent to {{ order.billing_email }}</p>
+    </div>
+    
+</body>
+</html>

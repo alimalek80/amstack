@@ -79,12 +79,21 @@
                     </form>
                     {% else %}
                     {% if user.is_authenticated %}
-                    <form method="post" action="{% url 'courses:enroll_course' course.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="inline-flex items-center px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-700 transition">
-                            Enroll Now - ${{ course.price }}
+                    <div class="space-y-4">
+                        <button type="button" 
+                                onclick="buyNowDigitalProduct('course', {{ course.id }}, '{{ course.title|escapejs }}')"
+                                class="inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-700 transition">
+                            Buy Now - ${{ course.price }}
                         </button>
-                    </form>
+                        <div class="flex items-center justify-center space-x-2 text-sm text-gray-600">
+                            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Lifetime access</span>
+                            <span>•</span>
+                            <span>All future updates</span>
+                        </div>
+                    </div>
                     {% else %}
                     <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="inline-flex items-center px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-700 transition">
                         Login to Enroll
@@ -187,4 +196,102 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+    // Cart functions
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    function addToCart(productType, productId, productName) {
+        fetch('{% url "orders:add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                product_type: productType,
+                product_id: productId,
+                quantity: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${productName} added to cart!`);
+                // Update cart count in navbar if exists
+                updateCartCount(data.basket_count);
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding to cart');
+        });
+    }
+
+    // Optimized function for digital products - goes straight to checkout
+    function buyNowDigitalProduct(productType, productId, productName) {
+        // Show loading state
+        const button = event.target;
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+        `;
+
+        fetch('{% url "orders:add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                product_type: productType,
+                product_id: productId,
+                quantity: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect directly to checkout for digital products
+                window.location.href = '{% url "orders:checkout" %}';
+            } else {
+                button.disabled = false;
+                button.textContent = originalText;
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            button.disabled = false;
+            button.textContent = originalText;
+            console.error('Error:', error);
+            alert('An error occurred while processing your purchase');
+        });
+    }
+
+    function updateCartCount(count) {
+        const cartBadge = document.querySelector('.absolute.-top-1.-right-1');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            if (count > 0) {
+                cartBadge.style.display = 'flex';
+            } else {
+                cartBadge.style.display = 'none';
+            }
+        }
+    }
+</script>
+
+<!-- Add CSRF token for JavaScript -->
+{% csrf_token %}
+{% endblock %}
 {% endblock %}

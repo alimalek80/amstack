@@ -111,21 +111,10 @@ class ProfileUpdateForm(forms.ModelForm):
     
     full_name = forms.CharField(
         max_length=255,
+        required=False,
         widget=forms.TextInput(attrs={
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition',
-        })
-    )
-    bio = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition',
-            'rows': 4,
-        })
-    )
-    newsletter_subscribed = forms.BooleanField(
-        required=False,
-        widget=forms.CheckboxInput(attrs={
-            'class': 'w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500',
+            'placeholder': 'Enter your full name',
         })
     )
     
