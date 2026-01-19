@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -129,6 +130,11 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Site Configuration
 SITE_URL = 'http://localhost:8000'  # Change this in production
+
+# Coinbase Commerce Settings
+COINBASE_COMMERCE_API_KEY = os.getenv('COINBASE_COMMERCE_API_KEY', '')  # Your Coinbase Commerce API Key
+COINBASE_COMMERCE_WEBHOOK_SECRET = os.getenv('COINBASE_COMMERCE_WEBHOOK_SECRET', '')  # Your webhook secret for verification
+COINBASE_COMMERCE_API_URL = 'https://api.commerce.coinbase.com'
 
 # Logging Configuration
 LOGGING = {

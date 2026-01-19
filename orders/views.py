@@ -22,6 +22,7 @@ from services.models import Service
 
 from .models import Order, OrderItem, BasketItem, Invoice
 from .email_service import OrderEmailService
+from .crypto_service import coinbase_service, crypto_direct_service
 from .utils import (
     ensure_course_enrollment,
     user_has_course_access,
@@ -277,43 +278,77 @@ def payment_view(request, order_number):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Simulate payment processing
                 payment_method = request.POST.get('payment_method', 'demo')
                 
-                # In a real app, you would integrate with a payment processor here
-                # For demo purposes, we'll simulate successful payment
+                if payment_method == 'coinbase_commerce':
+                    # Create Coinbase Commerce charge
+                    charge = coinbase_service.create_charge(order)
+                    
+                    if 'error' in charge:
+                        messages.error(request, f"Crypto payment error: {charge['error']}")
+                        return render(request, 'orders/payment.html', {'order': order})
+                    
+                    # Save charge info to order
+                    order.coinbase_charge_id = charge['id']
+                    order.coinbase_hosted_url = charge['hosted_url']
+                    order.payment_method = 'coinbase_commerce'
+                    order.save(update_fields=['coinbase_charge_id', 'coinbase_hosted_url', 'payment_method', 'updated_at'])
+                    
+                    # Redirect to Coinbase Commerce checkout
+                    return redirect(charge['hosted_url'])
                 
-                # Mark order as paid
-                order.mark_paid(
-                    payment_method=payment_method,
-                    transaction_id=f"demo_txn_{order.order_number}",
-                    payment_amount=order.total_amount
-                )
+                elif payment_method == 'crypto_direct':
+                    # Direct crypto payment
+                    crypto_currency = request.POST.get('crypto_currency', 'BTC')
+                    payment_details = crypto_direct_service.generate_payment_address(crypto_currency, order)
+                    
+                    if 'error' in payment_details:
+                        messages.error(request, f"Crypto payment error: {payment_details['error']}")
+                        return render(request, 'orders/payment.html', {'order': order})
+                    
+                    # Save crypto payment info
+                    order.payment_method = f'crypto_direct_{crypto_currency}'
+                    order.crypto_currency = crypto_currency
+                    order.crypto_address = payment_details['address']
+                    order.crypto_amount = payment_details['amount_needed']
+                    order.save(update_fields=['payment_method', 'crypto_currency', 'crypto_address', 'crypto_amount', 'updated_at'])
+                    
+                    # Redirect to crypto payment page
+                    return redirect('orders:crypto_payment', order_number=order.order_number)
                 
-                # Grant access to purchased products
-                order.grant_access_to_products()
-                
-                # Also grant access through OrderItems for content unlocking
-                for item in order.items.all():
-                    if item.course:
-                        ensure_course_enrollment(request.user, item.course)
-                    # Post access is handled through order checking in utils
-                
-                # Clear cart
-                BasketItem.objects.filter(user=request.user).delete()
-                
-                # Send confirmation email
-                OrderEmailService.send_order_confirmation(order)
-                
-                # Update profile counters
-                profile = getattr(request.user, 'profile', None)
-                if profile:
-                    profile.orders_count = Order.objects.filter(user=request.user, status=Order.STATUS_PAID).count()
-                    profile.active_courses_count = CourseEnrollment.objects.filter(user=request.user).count()
-                    profile.save(update_fields=['orders_count', 'active_courses_count'])
-                
-                messages.success(request, f"Payment successful! Order {order.order_number} has been confirmed.")
-                return redirect('orders:order_confirmation', order_number=order.order_number)
+                else:
+                    # Demo payment or traditional payment methods
+                    # Mark order as paid for demo
+                    order.mark_paid(
+                        payment_method=payment_method,
+                        transaction_id=f"demo_txn_{order.order_number}",
+                        payment_amount=order.total_amount
+                    )
+                    
+                    # Grant access to purchased products
+                    order.grant_access_to_products()
+                    
+                    # Also grant access through OrderItems for content unlocking
+                    for item in order.items.all():
+                        if item.course:
+                            ensure_course_enrollment(request.user, item.course)
+                        # Post access is handled through order checking in utils
+                    
+                    # Clear cart
+                    BasketItem.objects.filter(user=request.user).delete()
+                    
+                    # Send confirmation email
+                    OrderEmailService.send_order_confirmation(order)
+                    
+                    # Update profile counters
+                    profile = getattr(request.user, 'profile', None)
+                    if profile:
+                        profile.orders_count = Order.objects.filter(user=request.user, status=Order.STATUS_PAID).count()
+                        profile.active_courses_count = CourseEnrollment.objects.filter(user=request.user).count()
+                        profile.save(update_fields=['orders_count', 'active_courses_count'])
+                    
+                    messages.success(request, f"Payment successful! Order {order.order_number} has been confirmed.")
+                    return redirect('orders:order_confirmation', order_number=order.order_number)
                 
         except Exception as e:
             logger.error(f"Payment processing error for order {order.order_number}: {str(e)}")
@@ -342,6 +377,158 @@ def order_confirmation(request, order_number):
     }
     
     return render(request, 'orders/order_confirmation.html', context)
+
+
+@login_required
+def crypto_payment(request, order_number):
+    """Direct crypto payment page."""
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    
+    if order.status == Order.STATUS_PAID:
+        messages.info(request, "This order has already been paid.")
+        return redirect('orders:order_confirmation', order_number=order.order_number)
+    
+    if not order.crypto_address or not order.crypto_currency:
+        messages.error(request, "Crypto payment not initialized.")
+        return redirect('orders:payment', order_number=order.order_number)
+    
+    # Check payment status
+    payment_status = crypto_direct_service.check_payment_status(
+        order.crypto_address,
+        order.crypto_currency,
+        Decimal(order.crypto_amount or '0')
+    )
+    
+    context = {
+        'order': order,
+        'payment_status': payment_status,
+        'qr_code_url': f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={order.crypto_address}",
+    }
+    
+    return render(request, 'orders/crypto_payment.html', context)
+
+
+@login_required
+def crypto_return(request, order_number):
+    """Handle return from Coinbase Commerce."""
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    
+    if order.coinbase_charge_id:
+        # Get charge details from Coinbase Commerce
+        charge = coinbase_service.get_charge(order.coinbase_charge_id)
+        
+        if charge and charge.get('payments'):
+            # Check if payment was completed
+            for payment in charge['payments']:
+                if payment['status'] == 'CONFIRMED':
+                    # Mark order as paid
+                    order.mark_paid(
+                        payment_method='coinbase_commerce',
+                        transaction_id=payment['transaction_id'],
+                        payment_amount=order.total_amount
+                    )
+                    
+                    # Grant access and cleanup
+                    order.grant_access_to_products()
+                    for item in order.items.all():
+                        if item.course:
+                            ensure_course_enrollment(request.user, item.course)
+                    
+                    BasketItem.objects.filter(user=request.user).delete()
+                    OrderEmailService.send_order_confirmation(order)
+                    
+                    messages.success(request, "Crypto payment confirmed! Your order has been completed.")
+                    return redirect('orders:order_confirmation', order_number=order.order_number)
+        
+        # Payment not yet confirmed
+        messages.info(request, "Your crypto payment is being processed. Please wait for confirmation.")
+        return render(request, 'orders/crypto_pending.html', {'order': order})
+    
+    messages.error(request, "No crypto payment found for this order.")
+    return redirect('orders:payment', order_number=order.order_number)
+
+
+@csrf_exempt
+def coinbase_webhook(request):
+    """Handle Coinbase Commerce webhooks."""
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+    
+    try:
+        payload = request.body.decode('utf-8')
+        signature = request.headers.get('X-CC-Webhook-Signature', '')
+        
+        if not coinbase_service.verify_webhook_signature(payload, signature):
+            logger.warning("Invalid Coinbase Commerce webhook signature")
+            return HttpResponse(status=400)
+        
+        event_data = json.loads(payload)
+        event_type = event_data.get('event', {}).get('type')
+        charge_data = event_data.get('event', {}).get('data', {})
+        
+        if event_type == 'charge:confirmed':
+            # Payment confirmed
+            charge_id = charge_data.get('id')
+            metadata = charge_data.get('metadata', {})
+            order_number = metadata.get('order_number')
+            
+            if order_number:
+                try:
+                    order = Order.objects.get(order_number=order_number, coinbase_charge_id=charge_id)
+                    
+                    if order.status != Order.STATUS_PAID:
+                        # Get payment details
+                        payments = charge_data.get('payments', [])
+                        if payments:
+                            payment = payments[0]  # Use first payment
+                            transaction_id = payment.get('transaction_id', charge_id)
+                            
+                            order.mark_paid(
+                                payment_method='coinbase_commerce',
+                                transaction_id=transaction_id,
+                                payment_amount=order.total_amount
+                            )
+                            
+                            # Grant access
+                            order.grant_access_to_products()
+                            for item in order.items.all():
+                                if item.course:
+                                    ensure_course_enrollment(order.user, item.course)
+                            
+                            # Clear user's cart
+                            BasketItem.objects.filter(user=order.user).delete()
+                            
+                            # Send confirmation email
+                            OrderEmailService.send_order_confirmation(order)
+                            
+                            logger.info(f"Coinbase Commerce payment confirmed for order {order_number}")
+                
+                except Order.DoesNotExist:
+                    logger.error(f"Order not found for Coinbase charge {charge_id}")
+        
+        elif event_type == 'charge:failed':
+            # Payment failed
+            charge_id = charge_data.get('id')
+            metadata = charge_data.get('metadata', {})
+            order_number = metadata.get('order_number')
+            
+            if order_number:
+                try:
+                    order = Order.objects.get(order_number=order_number, coinbase_charge_id=charge_id)
+                    order.status = Order.STATUS_FAILED
+                    order.save(update_fields=['status', 'updated_at'])
+                    
+                    OrderEmailService.send_payment_failed(order)
+                    logger.info(f"Coinbase Commerce payment failed for order {order_number}")
+                
+                except Order.DoesNotExist:
+                    logger.error(f"Order not found for failed Coinbase charge {charge_id}")
+        
+        return HttpResponse(status=200)
+        
+    except Exception as e:
+        logger.error(f"Coinbase webhook error: {str(e)}")
+        return HttpResponse(status=500)
 
 
 # === INVOICE MANAGEMENT ===

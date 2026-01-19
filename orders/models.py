@@ -54,6 +54,13 @@ class Order(models.Model):
     payment_transaction_id = models.CharField(max_length=255, blank=True)
     payment_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
+    # Crypto payment fields
+    coinbase_charge_id = models.CharField(max_length=255, blank=True, null=True)
+    coinbase_hosted_url = models.URLField(blank=True, null=True)
+    crypto_currency = models.CharField(max_length=10, blank=True, null=True)  # BTC, ETH, etc.
+    crypto_amount = models.CharField(max_length=50, blank=True, null=True)  # Crypto amount as string
+    crypto_address = models.CharField(max_length=255, blank=True, null=True)  # Payment address
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

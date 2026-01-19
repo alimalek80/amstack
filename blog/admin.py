@@ -42,12 +42,25 @@ class PostAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Publishing', {
-            'fields': ('is_published', 'published_at', 'is_featured', 'is_free')
+            'fields': ('is_published', 'published_at', 'is_featured', 'is_free', 'price'),
+            'description': 'Set price to 0.00 or leave empty for free content. Uncheck "Is free" to make it a paid post.'
         }),
         ('Organization', {
             'fields': ('post_type', 'category', 'tags', 'author')
         }),
     )
+    
+    class Media:
+        js = ('admin/js/post_price_handler.js',)
+    
+    def save_model(self, request, obj, form, change):
+        # Auto-set is_free based on price
+        if obj.price and obj.price > 0:
+            obj.is_free = False
+        elif obj.price == 0 or obj.price is None:
+            obj.is_free = True
+            obj.price = 0.00
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(SavedPost)

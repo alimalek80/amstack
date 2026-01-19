@@ -53,6 +53,38 @@
                                 </div>
                             </label>
                             
+                            <!-- Coinbase Commerce -->
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="payment_method" value="coinbase_commerce" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Pay with Cryptocurrency</div>
+                                    <div class="text-sm text-gray-500">Bitcoin, Ethereum, Litecoin, and more</div>
+                                </div>
+                                <div class="flex space-x-1">
+                                    <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">BTC</span>
+                                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">ETH</span>
+                                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">LTC</span>
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">USDT</span>
+                                </div>
+                            </label>
+                            
+                            <!-- Direct Crypto Payment -->
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="payment_method" value="crypto_direct" class="mr-3">
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Direct Crypto Payment</div>
+                                    <div class="text-sm text-gray-500">Send crypto directly to our address</div>
+                                </div>
+                                <div id="crypto_currency_selector" class="hidden">
+                                    <select name="crypto_currency" class="text-sm border border-gray-300 rounded px-2 py-1">
+                                        <option value="BTC">Bitcoin (BTC)</option>
+                                        <option value="ETH">Ethereum (ETH)</option>
+                                        <option value="LTC">Litecoin (LTC)</option>
+                                        <option value="USDT">Tether USD (USDT)</option>
+                                    </select>
+                                </div>
+                            </label>
+                            
                             <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 opacity-50">
                                 <input type="radio" name="payment_method" value="stripe" disabled class="mr-3">
                                 <div class="flex-1">
@@ -73,6 +105,19 @@
                                 </div>
                                 <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_74x46.jpg" alt="PayPal" class="h-6">
                             </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Crypto Payment Info -->
+                    <div id="crypto-payment-info" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="text-sm font-medium text-blue-800">Cryptocurrency Payment</h4>
+                                <p class="text-xs text-blue-700 mt-1">You will be redirected to complete your crypto payment. Transaction confirmation may take a few minutes.</p>
+                            </div>
                         </div>
                     </div>
                     
@@ -213,22 +258,64 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+    const demoInfo = document.getElementById('demo-payment-info');
+    const cryptoInfo = document.getElementById('crypto-payment-info');
+    const cryptoSelector = document.getElementById('crypto_currency_selector');
     const payButton = document.getElementById('pay-button');
     const form = document.getElementById('payment-form');
     
+    // Handle payment method changes
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            // Hide all info boxes
+            if (demoInfo) demoInfo.classList.add('hidden');
+            if (cryptoInfo) cryptoInfo.classList.add('hidden');
+            if (cryptoSelector) cryptoSelector.classList.add('hidden');
+            
+            if (this.value === 'demo') {
+                if (demoInfo) demoInfo.classList.remove('hidden');
+            } else if (this.value === 'coinbase_commerce' || this.value === 'crypto_direct') {
+                if (cryptoInfo) cryptoInfo.classList.remove('hidden');
+                if (this.value === 'crypto_direct' && cryptoSelector) {
+                    cryptoSelector.classList.remove('hidden');
+                }
+            }
+        });
+    });
+    
+    // Handle form submission
     form.addEventListener('submit', function(e) {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        
         // Show processing state
         payButton.disabled = true;
-        payButton.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Processing Payment...
-        `;
         
-        // In a real app, you'd handle the payment processing here
-        // For demo, we just submit the form normally
+        if (selectedMethod === 'coinbase_commerce') {
+            payButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Redirecting to Crypto Payment...
+            `;
+        } else if (selectedMethod === 'crypto_direct') {
+            payButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generating Payment Address...
+            `;
+        } else {
+            payButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing Payment...
+            `;
+        }
     });
 });
 </script>

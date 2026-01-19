@@ -15,6 +15,11 @@ urlpatterns = [
     path('payment/<str:order_number>/', views.payment_view, name='payment'),
     path('confirmation/<str:order_number>/', views.order_confirmation, name='order_confirmation'),
     
+    # Crypto Payment URLs
+    path('crypto-payment/<str:order_number>/', views.crypto_payment, name='crypto_payment'),
+    path('crypto-return/<str:order_number>/', views.crypto_return, name='crypto_return'),
+    path('webhooks/coinbase/', views.coinbase_webhook, name='coinbase_webhook'),
+    
     # Invoice Management
     path('invoice/<str:invoice_number>/', views.invoice_view, name='invoice'),
     
