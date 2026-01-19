@@ -10,6 +10,7 @@ Markdown==3.5.2
 bleach>=6.0.0
 requests==2.31.0
 Pillow==10.2.0
+Pygments>=2.17.0
 
 # Additional utilities
 certifi==2023.11.17
