@@ -53,3 +53,18 @@ Thumbs.db
 .env
 .env.local
 *.env
+
+# --- cPanel / Passenger ---
+.htaccess
+passenger_wsgi.py
+public/
+tmp/
+stderr.log
+lscache/
+
+# --- Django runtime ---
+staticfiles/
+media/
+__pycache__/
+*.pyc
+
