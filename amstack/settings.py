@@ -14,12 +14,11 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-i-#54us9qa6eev-5667
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-# Allowed hosts configuration
-ALLOWED_HOSTS_ENV = os.getenv('DJANGO_ALLOWED_HOSTS', '')
-if ALLOWED_HOSTS_ENV:
-    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(',')]
-else:
-    ALLOWED_HOSTS = []
+# Allowed hosts configuration with safer defaults
+ALLOWED_HOSTS = [h.strip() for h in os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "127.0.0.1,localhost"
+).split(",") if h.strip()]
 
 
 # Application definition
@@ -136,7 +135,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = []
+_static_dir = BASE_DIR / "static"
+if _static_dir.exists():
+    STATICFILES_DIRS.append(_static_dir)
 
 # Media files configuration
 MEDIA_URL = '/media/'
