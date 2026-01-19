@@ -1,0 +1,21 @@
+# Django framework
+Django>=4.2,<5.0
+
+# Database drivers
+mysqlclient>=2.1.0  # For MySQL on cPanel
+# psycopg2-binary>=2.9.0  # Uncomment if using PostgreSQL
+
+# Core dependencies for your project
+Markdown==3.5.2
+bleach>=6.0.0
+requests==2.31.0
+Pillow==10.2.0
+
+# Additional utilities
+certifi==2023.11.17
+chardet==5.2.0
+idna==3.6
+urllib3==2.0.7
+typing_extensions==4.10.0
+setuptools>=68.0.0
+wheel>=0.40.0
