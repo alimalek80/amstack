@@ -20,64 +20,171 @@ django.setup()
 from django.db import connection
 from django.core.management import execute_from_command_line
 
+def check_current_charset():
+    """Check current charset settings in database."""
+    print("\n" + "=" * 50)
+    print("CURRENT CHARSET CHECK")
+    print("=" * 50)
+    
+    with connection.cursor() as cursor:
+        # Check database charset
+        cursor.execute("SELECT DEFAULT_CHARACTER_SET_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = %s", [connection.settings_dict['NAME']])
+        db_charset = cursor.fetchone()
+        print(f"Database charset: {db_charset[0] if db_charset else 'Unknown'}")
+        
+        # Check table charsets
+        tables_to_check = [
+            'blog_post', 'blog_category', 'blog_tag', 
+            'accounts_user', 'accounts_profile'
+        ]
+        
+        for table in tables_to_check:
+            try:
+                cursor.execute("""
+                    SELECT CCSA.character_set_name 
+                    FROM information_schema.`TABLES` T,
+                         information_schema.`COLLATION_CHARACTER_SET_APPLICABILITY` CCSA
+                    WHERE CCSA.collation_name = T.table_collation
+                      AND T.table_schema = %s
+                      AND T.table_name = %s
+                """, [connection.settings_dict['NAME'], table])
+                result = cursor.fetchone()
+                charset = result[0] if result else 'Not found'
+                print(f"Table {table}: {charset}")
+            except Exception as e:
+                print(f"Table {table}: Error checking - {e}")
+
 def fix_database_charset():
-    """Fix database charset issues."""
+    """Fix database charset issues with multiple approaches."""
     print("=" * 50)
-    print("MYSQL CHARSET FIX")
+    print("MYSQL CHARSET FIX - ENHANCED")
     print("=" * 50)
+    
+    # Check current charset first
+    check_current_charset()
     
     # Get database connection info
     db_settings = connection.settings_dict
     db_name = db_settings['NAME']
     
-    print(f"Database: {db_name}")
+    print(f"\nDatabase: {db_name}")
     print(f"Engine: {db_settings['ENGINE']}")
     
-    # SQL commands to fix charset
-    sql_commands = [
-        f"ALTER DATABASE {db_name} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+    print("\n🔧 METHOD 1: Complete Database Fix (RECOMMENDED)")
+    print("=" * 50)
+    
+    # More comprehensive SQL commands
+    sql_commands_method1 = [
+        # First, set the database charset
+        f"ALTER DATABASE `{db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
         
-        # Fix blog_post table
-        "ALTER TABLE blog_post CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE blog_post MODIFY title VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE blog_post MODIFY content LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE blog_post MODIFY excerpt TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE blog_post MODIFY slug VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        # Fix blog_post table completely
+        f"DROP TABLE IF EXISTS `{db_name}`.`blog_post_backup`;",
+        f"CREATE TABLE `{db_name}`.`blog_post_backup` AS SELECT * FROM `{db_name}`.`blog_post`;",
+        f"ALTER TABLE `{db_name}`.`blog_post` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        f"ALTER TABLE `{db_name}`.`blog_post` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
         
-        # Fix category table
-        "ALTER TABLE blog_category CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE blog_category MODIFY name VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE blog_category MODIFY slug VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        
-        # Fix tag table
-        "ALTER TABLE blog_tag CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE blog_tag MODIFY name VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE blog_tag MODIFY slug VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        
-        # Fix user table
-        "ALTER TABLE accounts_user CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE accounts_user MODIFY email VARCHAR(254) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE accounts_user MODIFY full_name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        
-        # Fix profile table
-        "ALTER TABLE accounts_profile CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-        "ALTER TABLE accounts_profile MODIFY bio TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        # Fix specific columns
+        f"ALTER TABLE `{db_name}`.`blog_post` MODIFY `title` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        f"ALTER TABLE `{db_name}`.`blog_post` MODIFY `content` LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        f"ALTER TABLE `{db_name}`.`blog_post` MODIFY `excerpt` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        f"ALTER TABLE `{db_name}`.`blog_post` MODIFY `slug` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
     ]
     
-    print("\n📝 SQL Commands to run in cPanel MySQL:")
-    print("=" * 50)
-    for cmd in sql_commands:
+    print("Copy these commands to phpMyAdmin:")
+    for cmd in sql_commands_method1:
         print(cmd)
     
-    print("\n" + "=" * 50)
-    print("MANUAL STEPS FOR cPanel:")
+    print("\n🔧 METHOD 2: Django Management Command (Alternative)")
     print("=" * 50)
-    print("1. Go to cPanel → phpMyAdmin")
-    print("2. Select your database: fammkoqw_amstack_db")
-    print("3. Click 'SQL' tab")
-    print("4. Copy and paste each command above, one by one")
-    print("5. Click 'Go' for each command")
-    print("\nOR copy all commands at once and run them together.")
+    print("If Method 1 doesn't work, create a Django migration:")
+    
+    migration_code = '''
+from django.db import migrations
+
+class Migration(migrations.Migration):
+    atomic = False
+    
+    dependencies = [
+        ('blog', '0004_post_price'),  # Update this to your latest migration
+    ]
+    
+    operations = [
+        migrations.RunSQL([
+            "ALTER TABLE blog_post CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+            "ALTER TABLE blog_post MODIFY title VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+            "ALTER TABLE blog_post MODIFY content LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+            "ALTER TABLE blog_post MODIFY excerpt TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        ], reverse_sql=[
+            "ALTER TABLE blog_post CONVERT TO CHARACTER SET latin1;",
+        ]),
+    ]
+'''
+    
+    print("1. Create file: blog/migrations/0005_fix_utf8_charset.py")
+    print("2. Add this content:")
+    print(migration_code)
+    print("3. Run: python manage.py migrate")
+    
+    print("\n🔧 METHOD 3: Recreate Tables (Nuclear Option)")
+    print("=" * 50)
+    print("If nothing else works:")
+    print("1. Export your data: python manage.py dumpdata blog > blog_backup.json")
+    print("2. Drop and recreate tables: python manage.py migrate blog zero")
+    print("3. Recreate with proper charset: python manage.py migrate")
+    print("4. Restore data: python manage.py loaddata blog_backup.json")
+
+def advanced_charset_test():
+    """More detailed charset testing."""
+    print("\n" + "=" * 50)
+    print("ADVANCED CHARSET TESTING")
+    print("=" * 50)
+    
+    # Test different types of UTF-8 content
+    test_cases = [
+        ("Basic UTF-8", "Hello World! àáâãäå"),
+        ("Emojis", "Test with emojis: 🚀 🎯 📝"),
+        ("Chinese", "测试中文字符"),
+        ("Arabic", "اختبار النص العربي"),
+        ("Special symbols", "✓ ✗ → ← ↑ ↓ ☀ ☁ ☂"),
+    ]
+    
+    from blog.models import Post
+    from django.contrib.auth import get_user_model
+    
+    User = get_user_model()
+    user = User.objects.first()
+    
+    if not user:
+        print("❌ No users found")
+        return
+    
+    failed_tests = []
+    
+    for test_name, test_content in test_cases:
+        try:
+            test_post = Post(
+                title=f"Test: {test_name}",
+                slug=f"test-{test_name.lower().replace(' ', '-')}",
+                content=test_content,
+                excerpt=test_content[:50],
+                author=user,
+                is_published=False
+            )
+            test_post.full_clean()  # Validate without saving
+            test_post.save()  # Try to save
+            test_post.delete()  # Clean up
+            print(f"✅ {test_name}: SUCCESS")
+        except Exception as e:
+            failed_tests.append((test_name, str(e)))
+            print(f"❌ {test_name}: {str(e)[:100]}...")
+    
+    if failed_tests:
+        print(f"\n❌ {len(failed_tests)} tests failed - charset fix needed")
+        return False
+    else:
+        print(f"\n✅ All tests passed - charset is working!")
+        return True
 
 def test_utf8_content():
     """Test if UTF-8 content can be saved."""
@@ -157,25 +264,34 @@ def create_media_directories():
             print(f"✅ Set 755 permissions: {dir_path}")
 
 def main():
-    print("🔧 AMStack MySQL Charset Fix Tool")
+    print("🔧 AMStack MySQL Charset Fix Tool - ENHANCED")
     print("This will help fix your UTF-8 encoding issues.")
     
     fix_database_charset()
     create_media_directories()
     
     print("\n" + "=" * 50)
-    print("AFTER RUNNING THE SQL COMMANDS:")
+    print("NEXT STEPS:")
     print("=" * 50)
-    print("1. Run this script again to test UTF-8 content")
-    print("2. Try creating a blog post with emojis")
-    print("3. The 500 error should be resolved!")
+    print("1. Try METHOD 1 first (copy SQL commands to phpMyAdmin)")
+    print("2. If that doesn't work, use METHOD 2 (Django migration)")
+    print("3. METHOD 3 is the nuclear option (recreate tables)")
     
-    # Ask if user wants to test UTF-8 (after they've run SQL commands)
-    response = input("\nHave you run the SQL commands in phpMyAdmin? (y/n): ").lower().strip()
+    # Ask if user wants to test charset status
+    response = input("\nDo you want to check current charset status? (y/n): ").lower().strip()
     if response.startswith('y'):
-        test_utf8_content()
+        check_current_charset()
+    
+    # Ask if user wants to test UTF-8 (after they've run fixes)
+    response = input("\nHave you run the charset fix commands? Test UTF-8 now? (y/n): ").lower().strip()
+    if response.startswith('y'):
+        if advanced_charset_test():
+            print("\n🎉 SUCCESS! Your database now supports UTF-8 properly!")
+            print("You can now create blog posts with emojis and special characters!")
+        else:
+            print("\n❌ Charset issues still exist. Try the alternative methods above.")
     else:
-        print("\n👆 Run the SQL commands first, then run this script again!")
+        print("\n👆 Run the charset fix commands first, then test again!")
 
 if __name__ == '__main__':
     main()
