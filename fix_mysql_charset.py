@@ -89,6 +89,11 @@ def fix_database_charset():
         f"ALTER TABLE `{db_name}`.`blog_post` MODIFY `content` LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
         f"ALTER TABLE `{db_name}`.`blog_post` MODIFY `excerpt` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
         f"ALTER TABLE `{db_name}`.`blog_post` MODIFY `slug` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        
+        # Fix Django admin log table (CRITICAL for admin panel)
+        f"ALTER TABLE `{db_name}`.`django_admin_log` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        f"ALTER TABLE `{db_name}`.`django_admin_log` MODIFY `object_repr` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+        f"ALTER TABLE `{db_name}`.`django_admin_log` MODIFY `change_message` LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
     ]
     
     print("Copy these commands to phpMyAdmin:")
