@@ -87,7 +87,7 @@ class UserLoginForm(AuthenticationForm):
         label='Email',
         widget=forms.EmailInput(attrs={
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition',
-            'placeholder': 'admin@admin.com',
+            'placeholder': 'Enter your email',
             'autofocus': True,
         })
     )
