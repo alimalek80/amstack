@@ -178,16 +178,54 @@ COINBASE_COMMERCE_API_URL = 'https://api.commerce.coinbase.com'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {name} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {name}: {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'django_errors.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        'blog_file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'blog_errors.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
         },
     },
     'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
+        'handlers': ['console', 'file'],
+        'level': 'WARNING',
     },
     'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'blog': {
+            'handlers': ['console', 'blog_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         'orders': {
             'handlers': ['console'],
             'level': 'DEBUG',
