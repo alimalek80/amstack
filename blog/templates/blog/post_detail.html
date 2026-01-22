@@ -1,25 +1,66 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ post.title }} - Amstack{% endblock %}
+{% block title %}{{ post.get_seo_title }} - Amstack{% endblock %}
 
 {% block extra_head %}
 <!-- SEO Meta Tags -->
-<meta name="description" content="{{ post.excerpt }}">
-<meta name="author" content="{% if post.author %}{{ post.author.full_name }}{% else %}Amstack{% endif %}">
+<meta name="description" content="{{ post.get_meta_description }}">
+<meta name="author" content="{% if post.author %}{{ post.author.get_full_name }}{% else %}Amstack{% endif %}">
+{% if post.get_keywords_list %}
+<meta name="keywords" content="{% for keyword in post.get_keywords_list %}{{ keyword }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+{% endif %}
+{% if post.focus_keyword %}
+<meta name="focus-keyword" content="{{ post.focus_keyword }}">
+{% endif %}
+{% if post.canonical_url %}
+<link rel="canonical" href="{{ post.canonical_url }}">
+{% else %}
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+{% endif %}
 
 <!-- Open Graph -->
-<meta property="og:title" content="{{ post.title }}">
-<meta property="og:description" content="{{ post.excerpt }}">
+<meta property="og:title" content="{{ post.get_seo_title }}">
+<meta property="og:description" content="{{ post.get_meta_description }}">
 <meta property="og:type" content="article">
 <meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:site_name" content="Amstack">
 {% if post.cover_image %}
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">
+<meta property="og:image:alt" content="{{ post.og_image_alt|default:post.title }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 {% endif %}
+{% if post.published_at %}
+<meta property="article:published_time" content="{{ post.published_at|date:'c' }}">
+{% endif %}
+<meta property="article:modified_time" content="{{ post.updated_at|date:'c' }}">
+{% if post.author %}
+<meta property="article:author" content="{{ post.author.get_full_name }}">
+{% endif %}
+{% for tag in post.tags.all %}
+<meta property="article:tag" content="{{ tag.name }}">
+{% endfor %}
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ post.title }}">
-<meta name="twitter:description" content="{{ post.excerpt }}">
+<meta name="twitter:title" content="{{ post.get_seo_title }}">
+<meta name="twitter:description" content="{{ post.get_meta_description }}">
+<meta name="twitter:site" content="@amstack">
+{% if post.cover_image %}
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">
+<meta name="twitter:image:alt" content="{{ post.og_image_alt|default:post.title }}">
+{% endif %}
+
+<!-- Additional SEO Meta -->
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="googlebot" content="index, follow">
+<meta name="rating" content="general">
+<meta name="revisit-after" content="7 days">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{{ structured_data|safe }}
+</script>>
 
 <style>
 /* Dark code blocks like the mockup */

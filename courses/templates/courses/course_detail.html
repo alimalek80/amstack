@@ -1,13 +1,49 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ course.title }} - Amstack{% endblock %}
+{% block title %}{{ course.get_seo_title }} - Amstack{% endblock %}
 
 {% block extra_head %}
-<meta name="description" content="{{ course.description|truncatechars:160 }}">
-<meta property="og:title" content="{{ course.title }}">
-<meta property="og:description" content="{{ course.description|truncatechars:160 }}">
-{% if course.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ course.cover_image.url }}">{% endif %}
+<!-- SEO Meta Tags -->
+<meta name="description" content="{{ course.get_meta_description }}">
+{% if course.get_keywords_list %}
+<meta name="keywords" content="{% for keyword in course.get_keywords_list %}{{ keyword }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+{% endif %}
+{% if course.focus_keyword %}
+<meta name="focus-keyword" content="{{ course.focus_keyword }}">
+{% endif %}
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ course.get_seo_title }}">
+<meta property="og:description" content="{{ course.get_meta_description }}">
 <meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:site_name" content="Amstack">
+{% if course.cover_image %}
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ course.cover_image.url }}">
+<meta property="og:image:alt" content="{{ course.og_image_alt|default:course.title }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+{% endif %}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ course.get_seo_title }}">
+<meta name="twitter:description" content="{{ course.get_meta_description }}">
+<meta name="twitter:site" content="@amstack">
+{% if course.cover_image %}
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ course.cover_image.url }}">
+<meta name="twitter:image:alt" content="{{ course.og_image_alt|default:course.title }}">
+{% endif %}
+
+<!-- Additional SEO Meta -->
+<meta name="robots" content="index, follow">
+<meta name="googlebot" content="index, follow">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{{ structured_data|safe }}
+</script>
 {% endblock %}
 
 {% block content %}

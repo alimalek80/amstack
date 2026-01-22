@@ -122,6 +122,7 @@ def post_detail(request, slug):
             'has_access': has_access,
             'is_saved': is_saved,
             'related_posts': related_posts,
+            'structured_data': post.get_structured_data(),
         }
         
         logger.debug(f"Successfully rendered post detail for {slug}")
@@ -132,14 +133,6 @@ def post_detail(request, slug):
         logger.exception("Full traceback:")
         messages.error(request, "An error occurred while loading the post.")
         return redirect('blog:post_list')
-
-    context = {
-        'post': post,
-        'has_access': has_access,
-        'is_saved': is_saved,
-        'related_posts': related_posts,
-    }
-    return render(request, 'blog/post_detail.html', context)
 
 
 def tag_posts(request, slug):

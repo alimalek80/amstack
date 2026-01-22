@@ -29,7 +29,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('is_published', 'is_featured', 'is_free', 'post_type', 'category', 'tags')
     list_editable = ('is_published', 'is_featured', 'is_free')
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'excerpt', 'content')
+    search_fields = ('title', 'excerpt', 'content', 'meta_keywords', 'focus_keyword')
     filter_horizontal = ('tags',)
     date_hierarchy = 'published_at'
     
@@ -37,12 +37,20 @@ class PostAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('title', 'slug', 'excerpt', 'content')
         }),
+        ('SEO Optimization', {
+            'fields': (
+                'seo_title', 'meta_description', 'meta_keywords', 
+                'focus_keyword', 'canonical_url', 'schema_type'
+            ),
+            'classes': ('collapse',),
+            'description': 'SEO fields are optional. If empty, will fallback to main title/excerpt.'
+        }),
         ('Media', {
-            'fields': ('cover_image',),
+            'fields': ('cover_image', 'og_image_alt'),
             'classes': ('collapse',)
         }),
         ('Publishing', {
-            'fields': ('is_published', 'published_at', 'is_featured', 'is_free', 'price'),
+            'fields': ('is_published', 'published_at', 'is_featured', 'is_free', 'price', 'reading_time_override'),
             'description': 'Set price to 0.00 or leave empty for free content. Uncheck "Is free" to make it a paid post.'
         }),
         ('Organization', {

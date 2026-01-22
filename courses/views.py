@@ -80,6 +80,7 @@ def course_detail(request, slug):
         'first_lesson': first_lesson,
         'has_access': has_access,
         'has_course_access': has_course_access,
+        'structured_data': course.get_structured_data(),
     }
     return render(request, 'courses/course_detail.html', context)
 
@@ -146,6 +147,7 @@ def lesson_detail(request, course_slug, slug):
         'has_access': has_lesson_access,  # Access to THIS lesson only
         'has_course_access': has_course_access,  # Access to full course
         'is_enrolled': is_enrolled,
+        'structured_data': lesson.get_structured_data(),
     }
     return render(request, 'courses/lesson_detail.html', context)
 

@@ -105,6 +105,60 @@ class Post(models.Model):
     excerpt = models.TextField(max_length=500, help_text='Short summary for cards and SEO')
     content = models.TextField(help_text='Write in Markdown format')
     
+    # SEO fields (all optional to preserve existing posts)
+    seo_title = models.CharField(
+        max_length=60, 
+        blank=True, 
+        null=True,
+        help_text='SEO optimized title (60 chars max, if empty will use main title)'
+    )
+    meta_description = models.TextField(
+        max_length=160, 
+        blank=True, 
+        null=True,
+        help_text='Meta description for search engines (160 chars max, if empty will use excerpt)'
+    )
+    meta_keywords = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text='Comma-separated keywords for SEO'
+    )
+    focus_keyword = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        help_text='Primary keyword to focus on for SEO'
+    )
+    canonical_url = models.URLField(
+        blank=True, 
+        null=True,
+        help_text='Canonical URL if this is republished content'
+    )
+    og_image_alt = models.CharField(
+        max_length=125, 
+        blank=True, 
+        null=True,
+        help_text='Alt text for Open Graph image'
+    )
+    schema_type = models.CharField(
+        max_length=50,
+        choices=[
+            ('Article', 'Article'),
+            ('BlogPosting', 'Blog Post'),
+            ('TechArticle', 'Technical Article'),
+            ('Tutorial', 'Tutorial'),
+            ('HowTo', 'How-To Guide'),
+        ],
+        default='BlogPosting',
+        help_text='Schema.org type for structured data'
+    )
+    reading_time_override = models.PositiveIntegerField(
+        blank=True, 
+        null=True,
+        help_text='Manual reading time in minutes (if empty, will be calculated)'
+    )
+    
     # Media
     cover_image = models.ImageField(upload_to='blog/', blank=True, null=True)
     
@@ -161,9 +215,70 @@ class Post(models.Model):
     @property
     def reading_time(self):
         """Estimate reading time in minutes."""
+        if self.reading_time_override:
+            return self.reading_time_override
         word_count = len(self.content.split())
         minutes = max(1, round(word_count / 200))
         return minutes
+    
+    @property
+    def get_seo_title(self):
+        """Return SEO title or fallback to main title."""
+        return self.seo_title or self.title
+    
+    @property
+    def get_meta_description(self):
+        """Return meta description or fallback to excerpt."""
+        return self.meta_description or self.excerpt
+    
+    @property
+    def get_keywords_list(self):
+        """Return keywords as a list."""
+        if self.meta_keywords:
+            return [kw.strip() for kw in self.meta_keywords.split(',') if kw.strip()]
+        return []
+    
+    @property
+    def get_canonical_url(self):
+        """Return canonical URL or the post's absolute URL."""
+        return self.canonical_url or self.get_absolute_url()
+    
+    def get_structured_data(self):
+        """Generate JSON-LD structured data for the post."""
+        import json
+        from django.urls import reverse
+        from django.utils.html import strip_tags
+        
+        data = {
+            "@context": "https://schema.org",
+            "@type": self.schema_type,
+            "headline": self.get_seo_title,
+            "description": self.get_meta_description,
+            "author": {
+                "@type": "Person",
+                "name": self.author.get_full_name() if self.author else "Amstack"
+            },
+            "datePublished": self.published_at.isoformat() if self.published_at else self.created_at.isoformat(),
+            "dateModified": self.updated_at.isoformat(),
+            "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": self.get_absolute_url()
+            }
+        }
+        
+        if self.cover_image:
+            data["image"] = {
+                "@type": "ImageObject",
+                "url": self.cover_image.url,
+                "alt": self.og_image_alt or self.title
+            }
+        
+        if self.focus_keyword:
+            data["keywords"] = self.focus_keyword
+        elif self.meta_keywords:
+            data["keywords"] = self.meta_keywords
+        
+        return json.dumps(data, indent=2)
     
     @property
     def content_html(self):
