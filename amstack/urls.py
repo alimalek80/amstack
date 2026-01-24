@@ -26,4 +26,6 @@ urlpatterns = [
     path('services/', include('services.urls')),
     path('orders/', include('orders.urls')),
     path('', include('leads.urls')),
+    # API endpoints
+    path('api/v1/', include('api.urls')),
 ]
