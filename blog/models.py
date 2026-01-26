@@ -171,6 +171,9 @@ class Post(models.Model):
     is_free = models.BooleanField(default=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
+    # Analytics
+    views = models.PositiveIntegerField(default=0)
+    
     # Type and organization
     post_type = models.CharField(max_length=20, choices=POST_TYPE_CHOICES, default='tutorial')
     category = models.ForeignKey(

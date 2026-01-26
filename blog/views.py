@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -91,6 +91,11 @@ def post_detail(request, slug):
         logger.debug(f"Accessing post detail for slug: {slug}")
         
         post = get_object_or_404(Post, slug=slug, is_published=True)
+        
+        # Increment view count
+        Post.objects.filter(id=post.id).update(views=F('views') + 1)
+        # Refresh from database to get updated view count
+        post.refresh_from_db()
         
         # Check if user has access to paid content
         has_access = user_has_post_access(request.user, post)
