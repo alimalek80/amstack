@@ -225,6 +225,11 @@ class Post(models.Model):
         return minutes
     
     @property
+    def save_count(self):
+        """Return the number of users who have saved this post."""
+        return self.saved_by.count()
+    
+    @property
     def get_seo_title(self):
         """Return SEO title or fallback to main title."""
         return self.seo_title or self.title
