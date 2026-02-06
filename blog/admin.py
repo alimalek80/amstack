@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Tag, Post, SavedPost
+from .models import Category, Tag, Post, SavedPost, Comment, Rating
 
 
 @admin.register(Category)
@@ -76,3 +76,26 @@ class SavedPostAdmin(admin.ModelAdmin):
     list_display = ('user', 'post', 'saved_at')
     list_filter = ('saved_at',)
     search_fields = ('user__email', 'post__title')
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'content_preview', 'parent', 'created_at', 'is_edited')
+    list_filter = ('created_at', 'is_edited')
+    search_fields = ('user__email', 'post__title', 'content')
+    raw_id_fields = ('post', 'user', 'parent')
+    date_hierarchy = 'created_at'
+    
+    def content_preview(self, obj):
+        return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
+    content_preview.short_description = 'Content'
+
+
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'stars', 'created_at', 'updated_at')
+    list_filter = ('stars', 'created_at')
+    search_fields = ('user__email', 'post__title')
+    raw_id_fields = ('post', 'user')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('created_at', 'updated_at')

@@ -230,6 +230,20 @@ class Post(models.Model):
         return self.saved_by.count()
     
     @property
+    def average_rating(self):
+        """Calculate average rating for the post."""
+        ratings = self.ratings.all()
+        if ratings.exists():
+            total = sum(rating.stars for rating in ratings)
+            return round(total / ratings.count(), 1)
+        return 0
+    
+    @property
+    def rating_count(self):
+        """Return the number of ratings for the post."""
+        return self.ratings.count()
+    
+    @property
     def get_seo_title(self):
         """Return SEO title or fallback to main title."""
         return self.seo_title or self.title
@@ -358,4 +372,73 @@ class SavedPost(models.Model):
     
     def __str__(self):
         return f"{self.user.email} saved {self.post.title}"
+
+
+class Rating(models.Model):
+    """Rating model for blog posts with 5-star rating system."""
+    
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='ratings'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='blog_ratings'
+    )
+    stars = models.PositiveIntegerField(
+        choices=[(1, '1 Star'), (2, '2 Stars'), (3, '3 Stars'), (4, '4 Stars'), (5, '5 Stars')],
+        help_text='Rating from 1 to 5 stars'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('user', 'post')
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.email} rated {self.post.title} - {self.stars} stars"
+
+
+class Comment(models.Model):
+    """Comment model for blog posts with nested reply support."""
+    
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='blog_comments'
+    )
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='replies'
+    )
+    content = models.TextField(max_length=1000)
+    is_edited = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['created_at']
+    
+    def __str__(self):
+        return f"Comment by {self.user.email} on {self.post.title}"
+    
+    @property
+    def is_reply(self):
+        """Check if this comment is a reply to another comment."""
+        return self.parent is not None
+    
+    def get_replies(self):
+        """Get all direct replies to this comment."""
+        return Comment.objects.filter(parent=self).select_related('user').order_by('created_at')
 

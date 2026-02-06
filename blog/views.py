@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 import logging
 
-from .models import Post, Tag, Category, SavedPost
+from .models import Post, Tag, Category, SavedPost, Comment, Rating
 from orders.utils import user_has_post_access
 
 logger = logging.getLogger('blog')
@@ -100,6 +100,7 @@ def post_detail(request, slug):
         # Check if user has access to paid content
         has_access = user_has_post_access(request.user, post)
         is_saved = False
+        user_rating = None
         
         if request.user.is_authenticated:
             try:
@@ -110,6 +111,14 @@ def post_detail(request, slug):
                 logger.error(f"Error checking saved status for post {slug}, user {request.user.email}: {str(e)}")
                 # Continue without failing the whole view
                 is_saved = False
+            
+            # Get user's rating for this post if exists
+            try:
+                rating = Rating.objects.filter(user=request.user, post=post).first()
+                if rating:
+                    user_rating = rating.stars
+            except Exception as e:
+                logger.error(f"Error checking rating for post {slug}, user {request.user.email}: {str(e)}")
 
         # Related posts (same tags, excluding current)
         try:
@@ -121,6 +130,12 @@ def post_detail(request, slug):
         except Exception as e:
             logger.error(f"Error fetching related posts for {slug}: {str(e)}")
             related_posts = []
+        
+        # Get comments (only top-level comments, replies are accessed via comment.get_replies())
+        comments = Comment.objects.filter(
+            post=post,
+            parent__isnull=True
+        ).select_related('user').prefetch_related('replies__user').order_by('-created_at')
 
         context = {
             'post': post,
@@ -128,6 +143,9 @@ def post_detail(request, slug):
             'is_saved': is_saved,
             'related_posts': related_posts,
             'structured_data': post.get_structured_data(),
+            'comments': comments,
+            'comments_count': post.comments.count(),
+            'user_rating': user_rating,
         }
         
         logger.debug(f"Successfully rendered post detail for {slug}")
@@ -234,4 +252,143 @@ def toggle_save_post(request, post_id):
         except Post.DoesNotExist:
             return redirect('blog:post_list')
 
+
+@login_required
+@require_POST
+def add_comment(request, slug):
+    """Add a comment to a blog post."""
+    post = get_object_or_404(Post, slug=slug, is_published=True)
+    content = request.POST.get('content', '').strip()
+    parent_id = request.POST.get('parent_id')
+    
+    if not content:
+        messages.error(request, "Comment cannot be empty.")
+        return redirect(post.get_absolute_url() + '#comments')
+    
+    if len(content) > 1000:
+        messages.error(request, "Comment is too long (max 1000 characters).")
+        return redirect(post.get_absolute_url() + '#comments')
+    
+    try:
+        comment = Comment.objects.create(
+            post=post,
+            user=request.user,
+            content=content,
+            parent_id=parent_id if parent_id else None
+        )
+        messages.success(request, "Comment added successfully!")
+        return redirect(post.get_absolute_url() + f'#comment-{comment.id}')
+    except Exception as e:
+        logger.error(f"Error adding comment: {str(e)}")
+        messages.error(request, "An error occurred while adding your comment.")
+        return redirect(post.get_absolute_url() + '#comments')
+
+
+@login_required
+@require_POST
+def delete_comment(request, comment_id):
+    """Delete a comment (only by admin/staff)."""
+    comment = get_object_or_404(Comment, id=comment_id)
+    post = comment.post
+    
+    # Check if user has permission to delete (admin only)
+    if not request.user.is_staff:
+        messages.error(request, "You don't have permission to delete this comment.")
+        return redirect(post.get_absolute_url() + '#comments')
+    
+    try:
+        comment.delete()
+        messages.success(request, "Comment deleted successfully!")
+    except Exception as e:
+        logger.error(f"Error deleting comment {comment_id}: {str(e)}")
+        messages.error(request, "An error occurred while deleting the comment.")
+    
+    return redirect(post.get_absolute_url() + '#comments')
+
+
+@login_required
+@require_POST
+def edit_comment(request, comment_id):
+    """Edit a comment (only by the comment author)."""
+    comment = get_object_or_404(Comment, id=comment_id)
+    post = comment.post
+    
+    # Check if user has permission to edit
+    if request.user != comment.user:
+        messages.error(request, "You don't have permission to edit this comment.")
+        return redirect(post.get_absolute_url() + '#comments')
+    
+    content = request.POST.get('content', '').strip()
+    
+    if not content:
+        messages.error(request, "Comment cannot be empty.")
+        return redirect(post.get_absolute_url() + f'#comment-{comment.id}')
+    
+    if len(content) > 1000:
+        messages.error(request, "Comment is too long (max 1000 characters).")
+        return redirect(post.get_absolute_url() + f'#comment-{comment.id}')
+    
+    try:
+        comment.content = content
+        comment.is_edited = True
+        comment.save()
+        messages.success(request, "Comment updated successfully!")
+    except Exception as e:
+        logger.error(f"Error editing comment {comment_id}: {str(e)}")
+        messages.error(request, "An error occurred while updating the comment.")
+    
+    return redirect(post.get_absolute_url() + f'#comment-{comment.id}')
+
+
+@login_required
+@require_POST
+def rate_post(request, slug):
+    """Rate a blog post with 1-5 stars."""
+    post = get_object_or_404(Post, slug=slug, is_published=True)
+    
+    try:
+        stars = int(request.POST.get('stars', 0))
+    except (ValueError, TypeError):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Invalid rating value'}, status=400)
+        messages.error(request, "Invalid rating value.")
+        return redirect(post.get_absolute_url())
+    
+    # Validate stars range
+    if stars < 1 or stars > 5:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Rating must be between 1 and 5 stars'}, status=400)
+        messages.error(request, "Rating must be between 1 and 5 stars.")
+        return redirect(post.get_absolute_url())
+    
+    try:
+        # Update or create rating
+        rating, created = Rating.objects.update_or_create(
+            user=request.user,
+            post=post,
+            defaults={'stars': stars}
+        )
+        
+        # Calculate new average
+        average_rating = post.average_rating
+        rating_count = post.rating_count
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'average_rating': average_rating,
+                'rating_count': rating_count,
+                'user_rating': stars,
+                'message': 'Rating updated!' if not created else 'Rating added!'
+            })
+        
+        messages.success(request, f"Thank you for rating this post {stars} stars!")
+        return redirect(post.get_absolute_url())
+        
+    except Exception as e:
+        logger.error(f"Error rating post {slug}: {str(e)}")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'An error occurred while saving your rating'}, status=500)
+        messages.error(request, "An error occurred. Please try again.")
+        return redirect(post.get_absolute_url())
 
