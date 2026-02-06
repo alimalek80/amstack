@@ -12,21 +12,23 @@ class ProfileInline(admin.StackedInline):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     inlines = (ProfileInline,)
-    list_display = ('email', 'full_name', 'is_staff', 'is_active', 'date_joined')
-    list_filter = ('is_staff', 'is_active')
+    list_display = ('email', 'full_name', 'is_writer', 'is_staff', 'is_active', 'email_verified', 'date_joined')
+    list_filter = ('is_staff', 'is_active', 'is_writer', 'email_verified')
     search_fields = ('email', 'full_name')
     ordering = ('-date_joined',)
     
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal Info', {'fields': ('full_name',)}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Permissions', {
+            'fields': ('is_active', 'email_verified', 'is_writer', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
     )
     
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'full_name', 'password1', 'password2', 'is_staff', 'is_active'),
+            'fields': ('email', 'full_name', 'password1', 'password2', 'is_writer', 'is_staff', 'is_active'),
         }),
     )
 

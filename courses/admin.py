@@ -5,14 +5,14 @@ from .models import Course, Lesson, CourseEnrollment
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'is_published', 'is_free', 'price', 'created_at')
-    list_filter = ('is_published', 'is_free')
+    list_display = ('title', 'author', 'is_published', 'is_free', 'price', 'created_at')
+    list_filter = ('is_published', 'is_free', 'author')
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'description', 'meta_keywords', 'focus_keyword')
+    search_fields = ('title', 'description', 'meta_keywords', 'focus_keyword', 'author__email', 'author__full_name')
     
     fieldsets = (
         (None, {
-            'fields': ('title', 'slug', 'description')
+            'fields': ('title', 'slug', 'description', 'author')
         }),
         ('SEO Optimization', {
             'fields': (

@@ -36,6 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=False)  # Inactive until email verified
     is_staff = models.BooleanField(default=False)
+    is_writer = models.BooleanField(default=False, help_text='Can create and manage blog posts and courses')
     email_verified = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     

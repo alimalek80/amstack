@@ -14,6 +14,14 @@ class Course(models.Model):
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     description = models.TextField(blank=True)
     cover_image = models.ImageField(upload_to='courses/', blank=True, null=True)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='authored_courses',
+        help_text='Course author/creator'
+    )
     
     # SEO fields (all optional to preserve existing courses)
     seo_title = models.CharField(
