@@ -36,12 +36,22 @@ class RegisterView(CreateView):
         user = form.save()
         
         # Send verification email
-        self.send_verification_email(user)
+        try:
+            self.send_verification_email(user)
+            messages.success(
+                self.request, 
+                'Account created successfully! Please check your email to verify your account.'
+            )
+        except Exception as e:
+            # Log the error and show a user-friendly message
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Failed to send verification email to {user.email}: {str(e)}')
+            messages.warning(
+                self.request, 
+                f'Account created but we could not send the verification email. Error: {str(e)}. Please try resending it.'
+            )
         
-        messages.success(
-            self.request, 
-            'Account created successfully! Please check your email to verify your account.'
-        )
         return redirect(self.success_url)
     
     def send_verification_email(self, user):
@@ -353,6 +363,11 @@ def resend_verification_email(request):
             messages.success(request, 'Verification email sent! Please check your inbox.')
         except User.DoesNotExist:
             messages.error(request, 'No unverified account found with that email address.')
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Failed to send verification email to {email}: {str(e)}')
+            messages.error(request, f'Failed to send email. Error: {str(e)}. Please contact support.')
         
         return redirect('accounts:login')
     

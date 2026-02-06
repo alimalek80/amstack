@@ -170,6 +170,7 @@ if os.getenv('EMAIL_HOST'):
     EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'True').lower() in ('true', '1', 'yes')
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'noreply@amstack.org')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+    EMAIL_TIMEOUT = 30  # Timeout in seconds
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
