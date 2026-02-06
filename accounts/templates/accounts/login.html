@@ -58,6 +58,10 @@
             <p class="text-center text-sm text-gray-600 mt-6">
                 Don't have an account? <a href="{% url 'accounts:register' %}" class="text-indigo-600 hover:text-indigo-700 font-medium">Create one</a>
             </p>
+            
+            <p class="text-center text-sm text-gray-600 mt-3">
+                Didn't receive verification email? <a href="{% url 'accounts:resend_verification' %}" class="text-indigo-600 hover:text-indigo-700 font-medium">Resend it</a>
+            </p>
         </div>
     </div>
 </section>
