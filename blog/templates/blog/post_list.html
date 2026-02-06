@@ -64,7 +64,7 @@
                                 {% if category.subcategories.all %}
                                 <ul class="space-y-1 text-sm text-gray-600 pl-3">
                                     {% for sub in category.subcategories.all %}
-                                    {% if sub.is_active %}
+                                    {% if sub.is_active and sub.has_posts %}
                                     <li>
                                         <a href="?category={{ sub.slug }}{% if query %}&q={{ query }}{% endif %}" 
                                            class="{% if current_category.slug == sub.slug %}text-indigo-600 font-medium{% else %}hover:text-indigo-600{% endif %}">
