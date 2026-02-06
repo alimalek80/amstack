@@ -73,7 +73,7 @@ class RegisterView(CreateView):
                     </p>
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
                     <p style="color: #999; font-size: 12px; text-align: center;">
-                        © 2026 AMStack. All rights reserved.
+                        (c) 2026 AMStack. All rights reserved.
                     </p>
                 </div>
             </body>
@@ -333,7 +333,7 @@ def resend_verification_email(request):
                         </p>
                         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
                         <p style="color: #999; font-size: 12px; text-align: center;">
-                            © 2026 AMStack. All rights reserved.
+                            (c) 2026 AMStack. All rights reserved.
                         </p>
                     </div>
                 </body>

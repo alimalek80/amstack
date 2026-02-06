@@ -161,9 +161,8 @@ LOGIN_REDIRECT_URL = 'accounts:dashboard'
 LOGOUT_REDIRECT_URL = 'core:home'
 
 # Email Configuration
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
+# Use SMTP backend if EMAIL_HOST is configured, otherwise console for development
+if os.getenv('EMAIL_HOST'):
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = os.getenv('EMAIL_HOST', 'amstack.org')
     EMAIL_PORT = int(os.getenv('EMAIL_PORT', '465'))
@@ -171,6 +170,8 @@ else:
     EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'True').lower() in ('true', '1', 'yes')
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'noreply@amstack.org')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'AMStack <noreply@amstack.org>')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
