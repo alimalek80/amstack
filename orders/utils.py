@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from typing import Optional
+import logging
 from .models import Order
 from courses.models import CourseEnrollment, Course
 from blog.models import Post
 from services.models import Service
+
+logger = logging.getLogger(__name__)
 
 
 def user_has_post_access(user, post: Post) -> bool:
@@ -71,8 +74,20 @@ def user_has_service_order(user, service: Service) -> bool:
 
 
 def ensure_course_enrollment(user, course: Course) -> CourseEnrollment:
-    """Create an enrollment for the user if it does not exist."""
-    enrollment, _ = CourseEnrollment.objects.get_or_create(user=user, course=course)
+    """
+    Create an enrollment for the user if it does not exist.
+    Sends admin notification for new enrollments.
+    """
+    enrollment, created = CourseEnrollment.objects.get_or_create(user=user, course=course)
+    
+    # Send admin notification if this is a new enrollment
+    if created:
+        try:
+            from core.notification_service import AdminNotificationService
+            AdminNotificationService.send_course_enrollment_notification(enrollment)
+        except Exception as e:
+            logger.error(f'Failed to send admin notification for enrollment {enrollment.id}: {str(e)}')
+    
     return enrollment
 
 

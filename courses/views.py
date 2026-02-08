@@ -2,10 +2,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.urls import reverse
+import logging
 
 from .models import Course, Lesson, CourseEnrollment
 from orders.utils import ensure_course_enrollment, user_has_course_access
 from orders.models import Order
+from core.notification_service import AdminNotificationService
+
+logger = logging.getLogger(__name__)
 
 
 def course_list(request):
@@ -57,9 +61,11 @@ def course_detail(request, slug):
     first_lesson = lessons.first()
 
     is_enrolled = False
-    has_course_access = user_has_course_access(request.user, course)
+    has_course_access = False
     
+    # Check user authentication and course access
     if request.user.is_authenticated:
+        has_course_access = user_has_course_access(request.user, course)
         is_enrolled = CourseEnrollment.objects.filter(
             user=request.user,
             course=course
@@ -80,6 +86,7 @@ def course_detail(request, slug):
         'first_lesson': first_lesson,
         'has_access': has_access,
         'has_course_access': has_course_access,
+        'user_is_authenticated': request.user.is_authenticated,
         'structured_data': course.get_structured_data(),
     }
     return render(request, 'courses/course_detail.html', context)
@@ -91,15 +98,19 @@ def lesson_detail(request, course_slug, slug):
     course_lessons = course.lessons.filter(is_published=True).order_by('order', 'created_at')
 
     is_enrolled = False
-    has_course_access = user_has_course_access(request.user, course)
+    has_course_access = False
     
-    # SECURITY FIX: Separate lesson access from course enrollment
-    # User can access this specific lesson if:
-    # 1. The lesson itself is free, OR
-    # 2. User has purchased/enrolled in the course
-    has_lesson_access = lesson.is_free or has_course_access
-    
-    if request.user.is_authenticated:
+    # Lessons are ONLY accessible to authenticated users
+    # Non-authenticated users cannot see lesson content
+    if not request.user.is_authenticated:
+        has_lesson_access = False
+    else:
+        has_course_access = user_has_course_access(request.user, course)
+        # Authenticated users can access lesson if:
+        # 1. The lesson itself is free (but user must be logged in), OR
+        # 2. User has purchased/enrolled in the course
+        has_lesson_access = lesson.is_free or has_course_access
+        
         is_enrolled = CourseEnrollment.objects.filter(user=request.user, course=course).exists()
         
         # Only auto-enroll if user has COURSE access (not just free lesson access)
@@ -160,5 +171,13 @@ def enroll_course(request, slug):
         checkout_url = f"{reverse('orders:create_order')}?course={course.slug}"
         return redirect(checkout_url)
 
-    CourseEnrollment.objects.get_or_create(user=request.user, course=course)
+    enrollment, created = CourseEnrollment.objects.get_or_create(user=request.user, course=course)
+    
+    # Send admin notification if this is a new enrollment
+    if created:
+        try:
+            AdminNotificationService.send_course_enrollment_notification(enrollment)
+        except Exception as e:
+            logger.error(f'Failed to send admin notification for enrollment {enrollment.id}: {str(e)}')
+    
     return redirect(course.get_absolute_url())

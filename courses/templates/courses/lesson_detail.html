@@ -242,8 +242,8 @@
 
             <div class="flex items-center justify-between gap-4">
                 {% if previous_lesson %}
-                    {% comment %} User can access previous lesson if it's free OR they have course access {% endcomment %}
-                    {% if previous_lesson.is_free or has_course_access %}
+                    {% comment %} User can access previous lesson only if authenticated AND (lesson is free OR they have course access) {% endcomment %}
+                    {% if user.is_authenticated and previous_lesson.is_free or has_course_access %}
                         <a href="{{ previous_lesson.get_absolute_url }}" class="flex-1 flex items-center gap-3 px-5 py-4 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -269,8 +269,8 @@
                 {% endif %}
 
                 {% if next_lesson %}
-                    {% comment %} User can access next lesson if it's free OR they have course access {% endcomment %}
-                    {% if next_lesson.is_free or has_course_access %}
+                    {% comment %} User can access next lesson only if authenticated AND (lesson is free OR they have course access) {% endcomment %}
+                    {% if user.is_authenticated and next_lesson.is_free or has_course_access %}
                         <a href="{{ next_lesson.get_absolute_url }}" class="flex-1 flex items-center justify-end gap-3 px-5 py-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition">
                             <div class="text-right">
                                 <div class="text-xs text-indigo-200 font-medium">Next</div>

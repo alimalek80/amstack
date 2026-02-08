@@ -16,6 +16,7 @@ from django.conf import settings
 from .forms import UserRegistrationForm, UserLoginForm, ProfileUpdateForm
 from courses.models import CourseEnrollment
 from orders.models import Order
+from core.notification_service import AdminNotificationService
 
 User = get_user_model()
 
@@ -51,6 +52,15 @@ class RegisterView(CreateView):
                 self.request, 
                 f'Account created but we could not send the verification email. Error: {str(e)}. Please try resending it.'
             )
+        
+        # Send admin notification about new registration
+        try:
+            AdminNotificationService.send_new_user_registration_notification(user)
+        except Exception as e:
+            # Log but don't show to user
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Failed to send admin notification for new user {user.email}: {str(e)}')
         
         return redirect(self.success_url)
     
