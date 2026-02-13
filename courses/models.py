@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.conf import settings
+from markdownx.models import MarkdownxField
 import markdown
 import bleach
 
@@ -163,7 +164,7 @@ class Lesson(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     excerpt = models.TextField(max_length=500, help_text='Short summary for cards and SEO')
-    content = models.TextField(help_text='Write in Markdown format')
+    content = MarkdownxField(help_text='Write in Markdown format - you can drag and drop images directly')
     cover_image = models.ImageField(upload_to='lessons/', blank=True, null=True)
     
     # SEO fields (all optional to preserve existing lessons)

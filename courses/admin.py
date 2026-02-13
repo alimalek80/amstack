@@ -1,4 +1,5 @@
 from django.contrib import admin
+from markdownx.admin import MarkdownxModelAdmin
 
 from .models import Course, Lesson, CourseEnrollment
 
@@ -33,7 +34,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 @admin.register(Lesson)
-class LessonAdmin(admin.ModelAdmin):
+class LessonAdmin(MarkdownxModelAdmin):
     list_display = ('title', 'course', 'is_published', 'is_free', 'order')
     list_filter = ('course', 'is_published', 'is_free')
     search_fields = ('title', 'excerpt', 'course__title', 'meta_keywords', 'focus_keyword')

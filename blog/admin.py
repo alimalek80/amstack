@@ -1,4 +1,5 @@
 from django.contrib import admin
+from markdownx.admin import MarkdownxModelAdmin
 from .models import Category, Tag, Post, SavedPost, Comment, Rating
 
 
@@ -24,7 +25,7 @@ class TagAdmin(admin.ModelAdmin):
 
 
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(MarkdownxModelAdmin):
     list_display = ('title', 'post_type', 'category', 'is_published', 'is_featured', 'is_free', 'price', 'published_at', 'reading_time')
     list_filter = ('is_published', 'is_featured', 'is_free', 'post_type', 'category', 'tags')
     list_editable = ('is_published', 'is_featured', 'is_free')

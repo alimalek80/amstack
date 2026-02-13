@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
+    'markdownx',
 
     # Local apps
     'accounts',
@@ -299,4 +300,11 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+# Markdownx Configuration
+MARKDOWNX_MEDIA_PATH = 'markdownx/'
+MARKDOWNX_UPLOAD_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif', 'image/webp']
+MARKDOWNX_IMAGE_MAX_SIZE = {'size': (1200, 1200), 'quality': 90}
+MARKDOWNX_UPLOAD_MAX_SIZE = 5 * 1024 * 1024  # 5MB
+MARKDOWNX_UPLOAD_URLS_PATH = '/markdownx/upload/'
 
