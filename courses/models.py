@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.conf import settings
 from markdownx.models import MarkdownxField
-import markdown
+from markdownx.utils import markdownify
 import bleach
 
 
@@ -287,23 +287,9 @@ class Lesson(models.Model):
 
     @property
     def content_html(self):
-        """Convert Markdown content to sanitized HTML."""
-        md = markdown.Markdown(extensions=[
-            'fenced_code',
-            'codehilite',
-            'tables',
-            'toc',
-            'nl2br',
-            'sane_lists',
-        ], extension_configs={
-            'codehilite': {
-                'css_class': 'highlight',
-                'linenums': False,
-                'guess_lang': True,
-            }
-        })
-
-        html = md.convert(self.content)
+        """Convert Markdown content to sanitized HTML using markdownx."""
+        # Use markdownx built-in conversion
+        html = markdownify(self.content)
 
         allowed_tags = [
             'p', 'br', 'strong', 'em', 'u', 's', 'blockquote',

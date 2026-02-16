@@ -6,7 +6,7 @@ mysqlclient>=2.1.0  # For MySQL on cPanel
 # psycopg2-binary>=2.9.0  # Uncomment if using PostgreSQL
 
 # Core dependencies for your project
-Markdown==3.5.2
+django-markdownx>=4.0.0
 bleach>=6.0.0
 requests==2.31.0
 Pillow==10.2.0

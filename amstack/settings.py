@@ -308,3 +308,18 @@ MARKDOWNX_IMAGE_MAX_SIZE = {'size': (1200, 1200), 'quality': 90}
 MARKDOWNX_UPLOAD_MAX_SIZE = 5 * 1024 * 1024  # 5MB
 MARKDOWNX_UPLOAD_URLS_PATH = '/markdownx/upload/'
 
+# Markdownx markdown processing configuration
+MARKDOWNX_MARKDOWN_EXTENSIONS = [
+    'markdown.extensions.extra',    # Includes tables, def_list, attr_list, etc.
+    'markdown.extensions.codehilite',
+    'markdown.extensions.toc',
+]
+
+MARKDOWNX_MARKDOWN_EXTENSION_CONFIGS = {
+    'markdown.extensions.codehilite': {
+        'css_class': 'highlight',
+        'linenums': False,
+        'guess_lang': True,
+    }
+}
+
