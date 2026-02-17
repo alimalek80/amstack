@@ -1587,16 +1587,6 @@
       }
     }
   }
-  .hover\:scale-110 {
-    &:hover {
-      @media (hover: hover) {
-        --tw-scale-x: 110%;
-        --tw-scale-y: 110%;
-        --tw-scale-z: 110%;
-        scale: var(--tw-scale-x) var(--tw-scale-y);
-      }
-    }
-  }
   .hover\:scale-125 {
     &:hover {
       @media (hover: hover) {
@@ -2107,6 +2097,44 @@
       display: none;
     }
   }
+}
+.prose blockquote {
+  position: relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-left: 4px solid #3b82f6;
+  padding: 1.5rem 2rem;
+  margin: 2rem 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  font-style: normal;
+  color: #475569;
+}
+.prose blockquote p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+@media (prefers-color-scheme: dark) {
+  .prose blockquote {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: #cbd5e1;
+    border-left-color: #60a5fa;
+  }
+}
+.prose blockquote.info {
+  border-left-color: #06b6d4;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+}
+.prose blockquote.warning {
+  border-left-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+}
+.prose blockquote.success {
+  border-left-color: #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
 }
 @property --tw-translate-x {
   syntax: "*";
