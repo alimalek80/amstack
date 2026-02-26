@@ -165,7 +165,65 @@
 .prose li { margin-bottom: 0.5rem; color: #374151; }
 .prose ul { list-style-type: disc; }
 .prose ol { list-style-type: decimal; }
-.prose blockquote { border-left: 4px solid #4f46e5; padding-left: 1rem; margin: 1.5rem 0; color: #6b7280; font-style: italic; }
+.prose blockquote { 
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #334155;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 1rem;
+    color: #cbd5e1;
+    font-style: normal;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+.prose blockquote::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    opacity: 0.1;
+    z-index: 0;
+}
+.prose blockquote:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.2);
+}
+.prose blockquote * {
+    position: relative;
+    z-index: 1;
+}
+.prose blockquote p {
+    color: #cbd5e1 !important;
+    font-size: 1.125rem;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+.prose blockquote a { 
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white !important;
+    font-weight: 600;
+    text-decoration: none !important;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.3);
+    transition: all 0.2s ease;
+    border: none;
+}
+.prose blockquote a:hover { 
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.4);
+    background: linear-gradient(135deg, #5b4ef2 0%, #8b5cf6 100%);
+}
+.prose blockquote a::after {
+    content: "↗";
+    margin-left: 0.25rem;
+    font-size: 0.875rem;
+}
 .prose code { background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.875rem; color: #dc2626; }
 .prose pre code { background: transparent; padding: 0; color: inherit; font-size: 0.875rem; }
 .prose img { border-radius: 0.5rem; margin: 1.5rem 0; }
