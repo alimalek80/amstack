@@ -512,6 +512,11 @@ console.log('Happy coding!');
         document.documentElement.classList.add('dark-mode');
     }
     
+    // Set initial content from placeholder if editor is empty
+    if (!editor.value.trim()) {
+        editor.value = editor.placeholder;
+    }
+    
     // Initial render
     updatePreview();
     updateWordCount();
@@ -694,14 +699,17 @@ console.log('Happy coding!');
     editor.addEventListener('input', function() {
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(() => {
-            localStorage.setItem('markdown-editor-content', editor.value);
+            // Don't save if content is just the placeholder
+            if (editor.value !== editor.placeholder) {
+                localStorage.setItem('markdown-editor-content', editor.value);
+            }
         }, 1000);
     });
     
     // Load saved content
     window.addEventListener('load', function() {
         const saved = localStorage.getItem('markdown-editor-content');
-        if (saved && editor.value.trim() === '') {
+        if (saved && (editor.value.trim() === '' || editor.value === editor.placeholder)) {
             editor.value = saved;
             updatePreview();
             updateWordCount();
