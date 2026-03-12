@@ -28,6 +28,7 @@ urlpatterns = [
     path('services/', include('services.urls')),
     path('orders/', include('orders.urls')),
     path('', include('leads.urls')),
+    path('tools/', include('tools.urls')),
     # API endpoints
     path('api/v1/', include('api.urls')),
     # Markdownx URLs for image uploads

@@ -1,0 +1,809 @@
+{% extends 'base.html' %}
+
+{% block title %}Markdown Live Preview - Amstack{% endblock %}
+
+{% block extra_head %}
+<style>
+    :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --bg-tertiary: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .dark-mode {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --border-color: #334155;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        transition: all 0.3s ease;
+    }
+
+    .dark-mode body {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    .main-container {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .dark-mode .main-container {
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+
+
+    .markdown-editor-container {
+        padding: 2rem;
+        height: calc(100vh - 40px);
+        min-height: 500px;
+        max-height: calc(100vh - 40px);
+        overflow: hidden;
+    }
+
+    .editor-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        height: calc(100% - 80px);
+        position: relative;
+    }
+
+    .editor-panel, .preview-panel {
+        background: var(--bg-primary);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .editor-panel:hover, .preview-panel:hover {
+        box-shadow: var(--shadow-xl);
+    }
+
+    .toolbar {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .toolbar-section {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .toolbar-btn {
+        background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .toolbar-btn:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .toolbar-btn.active {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+    }
+
+    .dark-mode-toggle {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: auto;
+    }
+
+    .dark-mode-toggle:hover {
+        background: var(--bg-tertiary);
+        transform: rotate(180deg);
+    }
+
+    .editor-textarea {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        resize: none;
+        font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        padding: 1.5rem;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    .editor-textarea:focus {
+        background: var(--bg-secondary);
+    }
+
+    .editor-textarea::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .preview-content {
+        padding: 1.5rem;
+        height: 100%;
+        overflow-y: auto;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.7;
+        font-size: 0.9rem;
+    }
+
+    .preview-content h1, .preview-content h2, .preview-content h3,
+    .preview-content h4, .preview-content h5, .preview-content h6 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin: 2rem 0 1rem 0;
+        position: relative;
+    }
+
+    .preview-content h1 { 
+        font-size: 2.5rem; 
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .preview-content h2 { 
+        font-size: 2rem;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.5rem;
+    }
+    .preview-content h3 { font-size: 1.5rem; }
+    .preview-content h4 { font-size: 1.25rem; }
+    .preview-content h5 { font-size: 1.125rem; }
+    .preview-content h6 { font-size: 1rem; }
+
+    .preview-content p {
+        margin-bottom: 1.25rem;
+        color: var(--text-primary);
+    }
+
+    .preview-content ul, .preview-content ol {
+        margin-bottom: 1.25rem;
+        padding-left: 2rem;
+        list-style-position: outside;
+    }
+
+    .preview-content ul {
+        list-style-type: disc;
+    }
+
+    .preview-content ol {
+        list-style-type: decimal;
+    }
+
+    .preview-content ul ul {
+        list-style-type: circle;
+        margin-bottom: 0.5rem;
+        margin-top: 0.5rem;
+        padding-left: 1.5rem;
+    }
+
+    .preview-content ul ul ul {
+        list-style-type: square;
+        padding-left: 1.5rem;
+    }
+
+    .preview-content ol ol {
+        list-style-type: lower-alpha;
+        margin-bottom: 0.5rem;
+        margin-top: 0.5rem;
+        padding-left: 1.5rem;
+    }
+
+    .preview-content ol ol ol {
+        list-style-type: lower-roman;
+        padding-left: 1.5rem;
+    }
+
+    .preview-content li {
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .preview-content code {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+        color: #6366f1;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .preview-content pre {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        overflow-x: auto;
+        box-shadow: var(--shadow-md);
+        position: relative;
+    }
+
+    .preview-content pre code {
+        background: none;
+        color: var(--text-primary);
+        padding: 0;
+    }
+
+    .preview-content blockquote {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+        border-left: 4px solid #6366f1;
+        margin: 1.5rem 0;
+        padding: 1rem 1.5rem;
+        border-radius: 0 12px 12px 0;
+        color: var(--text-secondary);
+        font-style: italic;
+        position: relative;
+    }
+
+    .preview-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+
+    .preview-content table th {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        padding: 1rem;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .preview-content table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .preview-content table tr:nth-child(even) td {
+        background: var(--bg-secondary);
+    }
+
+    .preview-content hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        margin: 2rem 0;
+        border-radius: 2px;
+    }
+
+    .preview-content a {
+        color: #6366f1;
+        text-decoration: none;
+        font-weight: 500;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .preview-content a:hover {
+        color: #a855f7;
+        border-bottom-color: #a855f7;
+    }
+
+    .word-count {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-left: auto;
+        box-shadow: var(--shadow-sm);
+    }
+
+
+    /* Scrollbar styling */
+    .preview-content::-webkit-scrollbar,
+    .editor-textarea::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .preview-content::-webkit-scrollbar-track,
+    .editor-textarea::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+        border-radius: 4px;
+    }
+
+    .preview-content::-webkit-scrollbar-thumb,
+    .editor-textarea::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        border-radius: 4px;
+    }
+
+    .preview-content::-webkit-scrollbar-thumb:hover,
+    .editor-textarea::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .editor-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .toolbar {
+            padding: 0.75rem 1rem;
+        }
+        
+        .toolbar-btn {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .markdown-editor-container {
+            padding: 1rem;
+        }
+        
+        .header-section {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-4">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="main-container">
+            <!-- Editor Container -->
+            <div class="markdown-editor-container">
+                <!-- Main Toolbar -->
+                <div class="toolbar mb-4">
+                    <div class="toolbar-section">
+                        <button class="toolbar-btn" onclick="clearEditor()" title="Clear All">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Clear All
+                        </button>
+                        
+                        <button class="toolbar-btn" onclick="copyToClipboard()" title="Copy Markdown">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            Copy
+                        </button>
+                        
+                        <button id="sync-scroll-btn" class="toolbar-btn" onclick="toggleSyncScroll()" title="Toggle Sync Scroll">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                            </svg>
+                            Sync Scroll
+                        </button>
+                    </div>
+
+                    <div class="word-count">
+                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span id="char-count">0</span> chars
+                    </div>
+
+                    <div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="editor-grid">
+                    <!-- Editor Panel -->
+                    <div class="editor-panel">
+                        <textarea 
+                            id="markdown-editor" 
+                            class="editor-textarea"
+                            placeholder="Start typing your markdown here... 
+
+# Welcome to Markdown Live Preview! 🎉
+
+Write your **beautiful** markdown and see it rendered *in real-time*.
+
+## Features
+
+- 💨 **Real-time preview** - See changes instantly
+- 🎨 **Beautiful styling** - Modern, clean design
+- 🌙 **Dark mode** - Easy on the eyes
+- 📱 **Responsive** - Works on all devices
+- ⌨️ **Keyboard shortcuts** - Ctrl+B, Ctrl+I, Ctrl+K
+
+```javascript
+console.log('Happy coding!');
+```
+
+> Start writing and watch the magic happen!">{{ initial_markdown|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- Preview Panel -->
+                    <div class="preview-panel">
+                        <div id="preview-content" class="preview-content">
+                            <!-- Preview will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const editor = document.getElementById('markdown-editor');
+    const preview = document.getElementById('preview-content');
+    const wordCount = document.getElementById('word-count');
+    const charCount = document.getElementById('char-count');
+    const syncScrollBtn = document.getElementById('sync-scroll-btn');
+    
+    // Sync scroll state
+    let isSyncScrollEnabled = false;
+    let isScrollingEditor = false;
+    let isScrollingPreview = false;
+    
+    // Dark mode functionality
+    function toggleDarkMode() {
+        document.documentElement.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.documentElement.classList.contains('dark-mode'));
+    }
+    
+    // Load dark mode preference
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark-mode');
+    }
+    
+    // Initial render
+    updatePreview();
+    updateWordCount();
+    
+    // Update preview on input with debouncing
+    let timeout;
+    editor.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            updatePreview();
+            updateWordCount();
+        }, 150);
+    });
+    
+    function updatePreview() {
+        const markdown = editor.value;
+        
+        // Show loading state
+        preview.innerHTML = '<div class="flex items-center justify-center h-32"><svg class="animate-spin h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>';
+        
+        fetch("{% url 'tools:markdown_preview_api' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ markdown: markdown })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.html) {
+                const currentScrollTop = preview.scrollTop;
+                preview.innerHTML = data.html;
+                // Restore scroll position
+                preview.scrollTop = currentScrollTop;
+                // Add fade-in animation
+                preview.style.opacity = '0';
+                setTimeout(() => {
+                    preview.style.opacity = '1';
+                }, 50);
+            } else {
+                preview.innerHTML = `
+                    <div class="flex items-center justify-center h-32 text-red-500">
+                        <svg class="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5l-6.928-11.999c-.77-.833-2.694-.833-3.464 0L2.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        <span>Error: ${data.error || 'Unknown error'}</span>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            preview.innerHTML = `
+                <div class="flex items-center justify-center h-32 text-red-500">
+                    <svg class="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5l-6.928-11.999c-.77-.833-2.694-.833-3.464 0L2.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <span>Connection error</span>
+                </div>
+            `;
+        });
+    }
+    
+    function updateWordCount() {
+        const text = editor.value;
+        const chars = text.length;
+        
+        charCount.textContent = chars.toLocaleString();
+    }
+    
+    function insertMarkdown(before, after) {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const selectedText = editor.value.substring(start, end);
+        const replacement = before + selectedText + after;
+        
+        editor.value = editor.value.substring(0, start) + replacement + editor.value.substring(end);
+        editor.focus();
+        
+        // Set cursor position
+        const newCursorPos = start + before.length + selectedText.length;
+        editor.setSelectionRange(newCursorPos, newCursorPos);
+        
+        updatePreview();
+        updateWordCount();
+        
+        // Add visual feedback
+        const event = new Event('input', { bubbles: true });
+        editor.dispatchEvent(event);
+    }
+    
+    function clearEditor() {
+        if (confirm('Are you sure you want to clear the editor? This action cannot be undone.')) {
+            editor.value = '';
+            updatePreview();
+            updateWordCount();
+            editor.focus();
+            
+            // Clear localStorage
+            localStorage.removeItem('markdown-editor-content');
+            
+            // Show success message
+            showNotification('Editor cleared successfully!', 'success');
+        }
+    }
+    
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `
+            fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium
+            transform translate-x-full transition-transform duration-300 ease-out
+            ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'}
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Slide in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Slide out and remove
+        setTimeout(() => {
+            notification.style.transform = 'translateX(full)';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Keyboard shortcuts
+    editor.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key.toLowerCase()) {
+                case 'b':
+                    e.preventDefault();
+                    insertMarkdown('**', '**');
+                    break;
+                case 'i':
+                    e.preventDefault();
+                    insertMarkdown('*', '*');
+                    break;
+                case 'k':
+                    e.preventDefault();
+                    insertMarkdown('[', '](url)');
+                    break;
+                case 's':
+                    e.preventDefault();
+                    showNotification('Content auto-saved to browser storage', 'success');
+                    break;
+            }
+        }
+        
+        // Tab key for indentation
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            insertMarkdown('    ', '');
+        }
+    });
+    
+    // Auto-save functionality
+    let saveTimeout;
+    editor.addEventListener('input', function() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            localStorage.setItem('markdown-editor-content', editor.value);
+        }, 1000);
+    });
+    
+    // Load saved content
+    window.addEventListener('load', function() {
+        const saved = localStorage.getItem('markdown-editor-content');
+        if (saved && editor.value.trim() === '') {
+            editor.value = saved;
+            updatePreview();
+            updateWordCount();
+        }
+    });
+
+    
+    // Add smooth transitions to elements
+    document.addEventListener('DOMContentLoaded', function() {
+        const elements = document.querySelectorAll('.toolbar-btn, .editor-panel, .preview-panel');
+        elements.forEach(el => {
+            el.style.transition = 'all 0.2s ease';
+        });
+    });
+    
+    // Sync scroll functionality
+    function toggleSyncScroll() {
+        isSyncScrollEnabled = !isSyncScrollEnabled;
+        
+        if (isSyncScrollEnabled) {
+            syncScrollBtn.classList.add('active');
+            syncScrollBtn.title = 'Disable Sync Scroll';
+            // Add scroll event listeners
+            editor.addEventListener('scroll', syncScrollEditorToPreview);
+            preview.addEventListener('scroll', syncScrollPreviewToEditor);
+        } else {
+            syncScrollBtn.classList.remove('active');
+            syncScrollBtn.title = 'Enable Sync Scroll';
+            // Remove scroll event listeners
+            editor.removeEventListener('scroll', syncScrollEditorToPreview);
+            preview.removeEventListener('scroll', syncScrollPreviewToEditor);
+        }
+    }
+    
+    function syncScrollEditorToPreview() {
+        if (!isSyncScrollEnabled || isScrollingPreview) return;
+        isScrollingEditor = true;
+        
+        const scrollPercentage = editor.scrollTop / (editor.scrollHeight - editor.clientHeight);
+        const targetScrollTop = scrollPercentage * (preview.scrollHeight - preview.clientHeight);
+        
+        if (isFinite(targetScrollTop)) {
+            preview.scrollTop = targetScrollTop;
+        }
+        
+        setTimeout(() => { isScrollingEditor = false; }, 100);
+    }
+    
+    function syncScrollPreviewToEditor() {
+        if (!isSyncScrollEnabled || isScrollingEditor) return;
+        isScrollingPreview = true;
+        
+        const scrollPercentage = preview.scrollTop / (preview.scrollHeight - preview.clientHeight);
+        const targetScrollTop = scrollPercentage * (editor.scrollHeight - editor.clientHeight);
+        
+        if (isFinite(targetScrollTop)) {
+            editor.scrollTop = targetScrollTop;
+        }
+        
+        setTimeout(() => { isScrollingPreview = false; }, 100);
+    }
+    
+    // Copy to clipboard functionality
+    function copyToClipboard() {
+        const text = editor.value;
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Markdown copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                fallbackCopyTextToClipboard(text);
+            });
+        } else {
+            fallbackCopyTextToClipboard(text);
+        }
+    }
+    
+    // Fallback copy method for older browsers
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showNotification('Markdown copied to clipboard!', 'success');
+            } else {
+                showNotification('Failed to copy to clipboard', 'error');
+            }
+        } catch (err) {
+            console.error('Fallback copy failed: ', err);
+            showNotification('Failed to copy to clipboard', 'error');
+        }
+        
+        document.body.removeChild(textArea);
+    }
+</script>
+{% endblock %}
