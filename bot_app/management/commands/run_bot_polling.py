@@ -4,6 +4,7 @@ Usage: python manage.py run_bot_polling
 """
 import logging
 import asyncio
+from asgiref.sync import sync_to_async
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from telegram import Update
@@ -64,8 +65,8 @@ class Command(BaseCommand):
         user_data = update.message.from_user
         chat_id = update.message.chat.id
         
-        # Get or create user
-        user = get_or_create_telegram_user(user_data.to_dict())
+        # Get or create user (wrap sync function in async)
+        user = await sync_to_async(get_or_create_telegram_user)(user_data.to_dict())
         
         # Send welcome message
         start_text = (
@@ -115,8 +116,8 @@ class Command(BaseCommand):
             )
             return
         
-        # Get or create user
-        user = get_or_create_telegram_user(user_data.to_dict())
+        # Get or create user (wrap sync function in async)
+        user = await sync_to_async(get_or_create_telegram_user)(user_data.to_dict())
         
         # Extract URL
         url = text.split()[0]
@@ -136,8 +137,8 @@ class Command(BaseCommand):
             )
             return
         
-        # Create download request
-        download_request = DownloadRequest.objects.create(
+        # Create download request (wrap in sync_to_async)
+        download_request = await sync_to_async(DownloadRequest.objects.create)(
             user=user,
             url=url,
             platform=platform or 'unknown',
@@ -155,7 +156,7 @@ class Command(BaseCommand):
         try:
             # Update status
             download_request.status = 'downloading'
-            download_request.save()
+            await sync_to_async(download_request.save)()
             
             await status_msg.edit_text('⬇️ Downloading content...')
             
@@ -172,7 +173,7 @@ class Command(BaseCommand):
             # Update download request
             download_request.media_type = media_type
             download_request.file_size = filesize
-            download_request.save()
+            await sync_to_async(download_request.save)()
             
             # Check file size
             if filesize > 45_000_000:  # 45MB
@@ -182,7 +183,7 @@ class Command(BaseCommand):
                 )
                 download_request.status = 'failed'
                 download_request.error_message = 'File too large'
-                download_request.save()
+                await sync_to_async(download_request.save)()
                 return
             
             if filesize == 0:
@@ -190,7 +191,7 @@ class Command(BaseCommand):
             
             # Update status
             download_request.status = 'uploading'
-            download_request.save()
+            await sync_to_async(download_request.save)()
             
             await status_msg.edit_text(
                 f'📤 Uploading {media_type} ({filesize/1024/1024:.1f} MB)...'
@@ -210,7 +211,7 @@ class Command(BaseCommand):
             download_request.status = 'completed'
             download_request.completed_at = timezone.now()
             download_request.download_duration = (datetime.now() - start_time).total_seconds()
-            download_request.save()
+            await sync_to_async(download_request.save)()
             
             LOG.info(f"Successfully processed {media_type} from {platform} for {user.username or user.telegram_id}")
             
@@ -222,7 +223,7 @@ class Command(BaseCommand):
             download_request.status = 'failed'
             download_request.error_message = error_msg
             download_request.completed_at = timezone.now()
-            download_request.save()
+            await sync_to_async(download_request.save)()
             
             # Send error message
             if 'private' in error_msg.lower() or '403' in error_msg:

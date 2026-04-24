@@ -356,11 +356,21 @@ def handle_media_url(chat_id: int, user: TelegramUser, url: str):
 
 @csrf_exempt
 @require_POST
-def telegram_webhook(request):
+def telegram_webhook(request, token):
     """
     Main webhook endpoint for receiving Telegram updates.
     This is called by Telegram servers when users interact with the bot.
+    
+    Args:
+        request: Django HTTP request
+        token: Secret token from URL path for security validation
     """
+    # Validate webhook secret token
+    expected_token = getattr(settings, 'TELEGRAM_WEBHOOK_SECRET', '')
+    if not expected_token or token != expected_token:
+        LOG.warning(f"Invalid webhook token received: {token}")
+        return HttpResponse('Forbidden', status=403)
+    
     try:
         # Parse update data
         update_data = json.loads(request.body.decode('utf-8'))
