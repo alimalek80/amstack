@@ -31,6 +31,8 @@ urlpatterns = [
     path('tools/', include('tools.urls')),
     # API endpoints
     path('api/v1/', include('api.urls')),
+    # Telegram Bot
+    path('bot/', include('bot_app.urls')),
     # Markdownx URLs for image uploads
     path('markdownx/', include('markdownx.urls')),
 ]

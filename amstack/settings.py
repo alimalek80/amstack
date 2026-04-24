@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'orders',
     'api',
     'tools',
+    'bot_app',
 ]
 
 MIDDLEWARE = [
@@ -244,6 +245,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'bot_app': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
 
@@ -323,4 +329,24 @@ MARKDOWNX_MARKDOWN_EXTENSION_CONFIGS = {
         'guess_lang': True,
     }
 }
+
+# =============================================================================
+# TELEGRAM BOT CONFIGURATION
+# =============================================================================
+
+# Telegram Bot Token - Get this from @BotFather on Telegram
+# REQUIRED: Must be set in environment variables (.env locally, cPanel in production)
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+
+# Telegram Webhook URL - This should be your public HTTPS URL
+# Format: https://yourdomain.com/bot/webhook/{SECRET_TOKEN}/
+# Important: Use HTTPS (required by Telegram) and include a secret token for security
+TELEGRAM_WEBHOOK_URL = os.getenv('TELEGRAM_WEBHOOK_URL', '')
+
+# Webhook Secret Token - Use a random string for security
+# This token is part of your webhook URL to prevent unauthorized access
+TELEGRAM_WEBHOOK_SECRET = os.getenv('TELEGRAM_WEBHOOK_SECRET', '')
+
+# Max file size for downloads (45MB to stay under Telegram's 50MB limit)
+TELEGRAM_MAX_FILE_SIZE = 45 * 1024 * 1024  # 45 MB
 

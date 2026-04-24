@@ -1,0 +1,11 @@
+# Telegram Bot Requirements
+# Add these to your main requirements.txt
+
+# Telegram bot library - supports async operations
+python-telegram-bot==20.7
+
+# Video/media downloading library
+yt-dlp>=2023.12.30
+
+# HTTP requests library (usually already installed with Django)
+requests>=2.31.0
