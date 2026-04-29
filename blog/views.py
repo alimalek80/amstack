@@ -64,6 +64,21 @@ def post_list(request):
     # Get parent categories with subcategories for sidebar
     categories = Category.get_parent_categories()
     
+    # Add post counts to categories and subcategories
+    for category in categories:
+        # Count posts in parent category
+        category.post_count = Post.objects.filter(
+            category=category,
+            is_published=True
+        ).count()
+        
+        # Count posts in each subcategory
+        for sub in category.subcategories.all():
+            sub.post_count = Post.objects.filter(
+                category=sub,
+                is_published=True
+            ).count()
+    
     # Get user's saved posts if authenticated
     saved_post_ids = []
     if request.user.is_authenticated:

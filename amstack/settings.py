@@ -19,9 +19,8 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-i-#54us9qa6eev-5667
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 # Allowed hosts configuration with safer defaults
-ALLOWED_HOSTS = [h.strip() for h in os.getenv(
-    "DJANGO_ALLOWED_HOSTS",
-    "127.0.0.1,localhost"
+ALLOWED_HOSTS = [h.strip() for h in (
+    os.getenv("DJANGO_ALLOWED_HOSTS") or "127.0.0.1,localhost"
 ).split(",") if h.strip()]
 
 
