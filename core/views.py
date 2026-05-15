@@ -40,6 +40,15 @@ def tools(request):
             'featured': True,
             'tags': ['markdown', 'preview', 'editor', 'documentation']
         },
+        {
+            'name': 'Markdown to PDF',
+            'description': 'Upload a .md file and download a beautifully styled PDF with working links, tables, and code highlighting.',
+            'icon': 'pdf',
+            'url': 'tools:md_to_pdf',
+            'category': 'Text & Documentation',
+            'featured': True,
+            'tags': ['markdown', 'pdf', 'converter', 'export']
+        },
         # Future tools can be added here
         # {
         #     'name': 'JSON Formatter',
