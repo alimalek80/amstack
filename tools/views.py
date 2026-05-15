@@ -147,9 +147,16 @@ def md_to_pdf(request):
                 margin = f'{margin_cm}cm'
 
                 # Convert Markdown → HTML
-                md = markdown.Markdown(extensions=[
-                    'extra', 'toc', 'codehilite', 'nl2br', 'sane_lists',
-                ])
+                md = markdown.Markdown(
+                    extensions=['extra', 'toc', 'codehilite', 'nl2br', 'sane_lists'],
+                    extension_configs={
+                        'codehilite': {
+                            'noclasses': True,      # inline style= attrs, no external CSS needed
+                            'pygments_style': 'friendly',
+                            'guess_lang': False,
+                        }
+                    },
+                )
                 body_html = md.convert(raw)
 
                 # Title from first H1 or filename
@@ -228,20 +235,19 @@ def md_to_pdf(request):
   code {{
     font-family: 'Courier New', Courier, monospace;
     font-size: 9.5pt;
-    background: #f1f5f9;
-    color: #be185d;
+    background: #fff0f3;
+    color: #c0143c;
     padding: 1px 5px;
-    border-radius: 4px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #fcd0d8;
   }}
-  pre {{
-    background: #0f172a;
-    color: #e2e8f0;
-    padding: 12pt 14pt;
-    border-radius: 8px;
-    overflow: hidden;
+  pre, .codehilite {{
+    background: #f6f8fa;
+    color: #24292e;
+    border: 1px solid #d0d7de;
+    border-left: 4px solid #4f46e5;
+    padding: 10pt 13pt;
     font-size: 9pt;
-    line-height: 1.5;
+    line-height: 1.55;
     page-break-inside: avoid;
     margin: 1em 0;
   }}
