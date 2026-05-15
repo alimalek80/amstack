@@ -29,6 +29,6 @@ wheel>=0.40.0
 python-telegram-bot==20.7
 yt-dlp>=2024.0.0
 
-# Markdown to PDF conversion
+# Markdown to PDF conversion specially for deploy
 weasyprint>=61.0
 xhtml2pdf>=0.2.11   # pure-Python fallback when weasyprint needs newer libpango
