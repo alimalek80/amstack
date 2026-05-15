@@ -56,6 +56,7 @@ def _html_to_pdf(html: str) -> bytes:
 
     try:
         import io
+        import re
         from xhtml2pdf import pisa
     except ImportError:
         raise RuntimeError(
@@ -66,8 +67,16 @@ def _html_to_pdf(html: str) -> bytes:
             'pyHanko pyhanko-certvalidator'
         )
 
+    # xhtml2pdf does not support nested @page margin-box rules such as
+    # @bottom-center, @top-center, etc. Strip them to prevent
+    # "'NotImplementedType' object is not iterable".
+    xhtml2pdf_html = re.sub(
+        r'@(?:top|bottom|left|right)(?:-(?:left|center|right|middle))?\s*\{[^}]*\}',
+        '',
+        html,
+    )
     buf = io.BytesIO()
-    pisa.CreatePDF(html, dest=buf)
+    pisa.CreatePDF(xhtml2pdf_html, dest=buf)
     return buf.getvalue()
 
 
