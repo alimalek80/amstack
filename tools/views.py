@@ -52,11 +52,23 @@ def _html_to_pdf(html: str) -> bytes:
     try:
         return weasyprint.HTML(string=html).write_pdf()
     except (AttributeError, OSError):
+        pass  # weasyprint failed – try xhtml2pdf fallback
+
+    try:
         import io
         from xhtml2pdf import pisa
-        buf = io.BytesIO()
-        pisa.CreatePDF(html, dest=buf)
-        return buf.getvalue()
+    except ImportError:
+        raise RuntimeError(
+            'PDF generation requires either weasyprint (with libpango >= 1.44) '
+            'or xhtml2pdf. Install xhtml2pdf with: '
+            'pip install xhtml2pdf --no-deps && '
+            'pip install arabic-reshaper html5lib pypdf python-bidi "reportlab<5" '
+            'pyHanko pyhanko-certvalidator'
+        )
+
+    buf = io.BytesIO()
+    pisa.CreatePDF(html, dest=buf)
+    return buf.getvalue()
 
 
 def markdown_live_preview(request):
