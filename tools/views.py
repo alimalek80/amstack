@@ -66,6 +66,7 @@ def _html_to_pdf(html: str) -> bytes:
             'pip install arabic-reshaper html5lib pypdf python-bidi "reportlab<5" '
             'pyHanko pyhanko-certvalidator'
         )
+    
 
     # xhtml2pdf does not support nested @page margin-box rules such as
     # @bottom-center, @top-center, etc. Strip them to prevent
